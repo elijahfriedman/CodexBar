@@ -885,6 +885,7 @@ extension StatusItemController {
                 systemImageName: action.systemImageName),
             id: Self.persistentRefreshMenuItemID,
             width: width,
+            heightCacheFingerprint: "persistentRefreshAction:\(action.systemImageName ?? "")|\(title)",
             onClick: { [weak self, weak menu] in
                 guard let self, let menu else { return }
                 self.performPersistentRefreshAction(in: ObjectIdentifier(menu))
