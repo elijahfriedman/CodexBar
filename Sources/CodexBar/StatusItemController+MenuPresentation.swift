@@ -142,6 +142,7 @@ final class MenuCardItemHostingView<Content: View>: NSHostingView<Content>, Menu
         if onClick != nil {
             self.installClickRecognizer()
         }
+        self.updateAccessibilityActivation()
     }
 
     /// Reuses this hosting view for a rebuilt card with the same identity: the replaced
@@ -155,6 +156,25 @@ final class MenuCardItemHostingView<Content: View>: NSHostingView<Content>, Menu
         if onClick != nil, !self.hasClickRecognizer {
             self.installClickRecognizer()
         }
+        self.updateAccessibilityActivation()
+    }
+
+    /// `NSMenu` tracking consumes keyboard events before they reach a menu item's custom view, so
+    /// the pointer `onClick` path has no native counterpart for assistive tech. Expose the row as an
+    /// accessibility button whose press mirrors a click, giving VoiceOver an activation path that runs
+    /// `onClick` (and therefore keeps the menu open) instead of regressing to mouse-only.
+    private func updateAccessibilityActivation() {
+        if self.onClick != nil {
+            self.setAccessibilityRole(.button)
+        }
+    }
+
+    override func accessibilityPerformPress() -> Bool {
+        guard let onClick = self.onClick else {
+            return super.accessibilityPerformPress()
+        }
+        onClick()
+        return true
     }
 
     private func installClickRecognizer() {
