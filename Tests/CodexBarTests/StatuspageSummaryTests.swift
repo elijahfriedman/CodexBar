@@ -1,6 +1,7 @@
 import Foundation
 import Testing
 @testable import CodexBar
+@testable import CodexBarCore
 
 @MainActor
 struct StatuspageSummaryTests {
@@ -72,6 +73,32 @@ struct StatuspageSummaryTests {
     func `parse statuspage components tolerates missing components`() throws {
         let components = try UsageStore.parseStatuspageComponents(data: Data("{}".utf8))
         #expect(components.isEmpty)
+    }
+
+    @Test
+    func `fetchStatusSummary returns status with empty components when component feed fails`() async throws {
+        let summaryJSON = Data(#"""
+        {
+          "page": {"updated_at": "2026-06-18T19:41:22Z"},
+          "status": {"indicator": "minor", "description": "Partial Outage"}
+        }
+        """#.utf8)
+
+        let stub = ProviderHTTPTransportStub { request in
+            guard let path = request.url?.path else { throw URLError(.badURL) }
+            if path.hasSuffix("summary.json") {
+                let response = HTTPURLResponse(url: request.url!, statusCode: 200, httpVersion: nil, headerFields: nil)!
+                return (summaryJSON, response)
+            }
+            throw URLError(.notConnectedToInternet)
+        }
+
+        let baseURL = try #require(URL(string: "https://status.example.test"))
+        let result = try await UsageStore.fetchStatusSummary(from: baseURL, transport: stub)
+
+        #expect(result.status.indicator == .minor)
+        #expect(result.status.description == "Partial Outage")
+        #expect(result.components.isEmpty)
     }
 
     @Test

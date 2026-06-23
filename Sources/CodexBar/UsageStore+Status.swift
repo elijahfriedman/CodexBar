@@ -118,12 +118,15 @@ extension UsageStore {
         componentsRequest.timeoutInterval = 10
 
         async let summaryResult = transport.data(for: summaryRequest)
-        async let componentsResult = transport.data(for: componentsRequest)
+        // Non-throwing sibling: component failures must not mask a healthy summary.
+        async let componentsResult: (Data, URLResponse)? = try? transport.data(for: componentsRequest)
 
         let status = try await Self.parseStatuspageStatus(data: summaryResult.0)
-        // Components are best-effort: a healthy overall status should still surface even if the
-        // component feed hiccups.
-        let components = await (try? Self.parseStatuspageComponents(data: componentsResult.0)) ?? []
+        let components: [ProviderStatusComponent] = if let (componentsData, _) = await componentsResult {
+            (try? Self.parseStatuspageComponents(data: componentsData)) ?? []
+        } else {
+            []
+        }
         return (status, components)
     }
 
