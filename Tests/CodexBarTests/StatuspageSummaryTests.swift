@@ -102,7 +102,7 @@ struct StatuspageSummaryTests {
     }
 
     @Test
-    func `fetchStatusSummary overlays description and updatedAt from status endpoint when incident io succeeds`() async throws {
+    func `fetchStatusSummary overlays description and updatedAt when incident io succeeds`() async throws {
         let proxyJSON = Data(#"""
         {
           "summary": {
