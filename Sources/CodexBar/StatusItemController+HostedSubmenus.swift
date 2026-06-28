@@ -278,7 +278,7 @@ extension StatusItemController {
         ].joined(separator: "|")
     }
 
-    private func statusComponentsRenderSignature(for provider: UsageProvider) -> String {
+    func statusComponentsRenderSignature(for provider: UsageProvider) -> String {
         let components = self.store.statusComponents(for: provider)
         guard !components.isEmpty else { return "none" }
         func signature(_ component: ProviderStatusComponent) -> String {

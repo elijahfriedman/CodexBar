@@ -128,6 +128,7 @@ extension StatusItemController {
                 [
                     provider.rawValue,
                     "token=\(tokenSignature)",
+                    "statusComponents=\(self.statusComponentsRenderSignature(for: provider))",
                     "refreshing=\(self.store.shouldShowRefreshingMenuCardIndicator(for: provider) ? "1" : "0")",
                     "usageHistory=\(usageHistoryVisible ? "1" : "0")",
                 ].joined(separator: ":"))
