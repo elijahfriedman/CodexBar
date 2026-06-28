@@ -225,7 +225,7 @@ extension UsageStore {
                 id: id,
                 name: name,
                 indicator: ProviderStatusComponent.indicator(forStatuspageStatus: raw),
-                statusLabel: ProviderStatusComponent.label(forStatuspageStatus: raw))
+                status: raw)
         }
 
         var topLevel: [ProviderStatusComponent] = []
@@ -243,8 +243,7 @@ extension UsageStore {
                     id: group.id,
                     name: groupName,
                     indicator: worst?.indicator ?? .none,
-                    statusLabel: worst?.statusLabel ?? ProviderStatusComponent
-                        .label(forStatuspageStatus: "operational"),
+                    status: worst?.status ?? "operational",
                     children: children))
             } else if let component = item.component,
                       component.hidden != true,
@@ -324,7 +323,7 @@ extension UsageStore {
                 id: component.id,
                 name: Self.normalizedStatusComponentName(component.name) ?? component.name,
                 indicator: ProviderStatusComponent.indicator(forStatuspageStatus: component.status),
-                statusLabel: ProviderStatusComponent.label(forStatuspageStatus: component.status),
+                status: component.status,
                 children: children)
         }
 

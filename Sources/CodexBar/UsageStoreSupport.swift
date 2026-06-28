@@ -41,13 +41,18 @@ struct ProviderStatusComponent: Identifiable, Equatable {
     let id: String
     let name: String
     let indicator: ProviderStatusIndicator
-    /// Right-aligned status text shown for the row (e.g. "Operational").
-    let statusLabel: String
+    /// Raw provider status. The display label is localized when the row renders so changing
+    /// the app language does not require another network refresh.
+    let status: String
     /// Child rows for a component group; empty for leaf components.
     var children: [ProviderStatusComponent] = []
 
     var isGroup: Bool {
         !self.children.isEmpty
+    }
+
+    var statusLabel: String {
+        Self.label(forStatuspageStatus: self.status)
     }
 
     /// Maps a statuspage.io component `status` string to our indicator + display label.

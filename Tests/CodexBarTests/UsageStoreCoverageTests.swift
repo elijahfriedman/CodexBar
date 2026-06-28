@@ -282,7 +282,7 @@ struct UsageStoreCoverageTests {
         store._setErrorForTesting("stale", provider: .claude)
         store.statuses[.claude] = ProviderStatus(indicator: .major, description: "Outage", updatedAt: Date())
         store.statusComponents[.claude] = [
-            ProviderStatusComponent(id: "api", name: "API", indicator: .major, statusLabel: "Outage"),
+            ProviderStatusComponent(id: "api", name: "API", indicator: .major, status: "major_outage"),
         ]
 
         #expect(store.enabledProviders() == [.codex])
@@ -455,7 +455,7 @@ struct UsageStoreCoverageTests {
         store._setErrorForTesting("stale", provider: .synthetic)
         store.statuses[.synthetic] = ProviderStatus(indicator: .major, description: "Outage", updatedAt: Date())
         store.statusComponents[.synthetic] = [
-            ProviderStatusComponent(id: "api", name: "API", indicator: .major, statusLabel: "Outage"),
+            ProviderStatusComponent(id: "api", name: "API", indicator: .major, status: "major_outage"),
         ]
         store.tokenErrors[.synthetic] = "token stale"
 

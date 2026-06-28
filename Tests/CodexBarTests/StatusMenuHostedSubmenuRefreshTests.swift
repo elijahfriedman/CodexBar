@@ -31,7 +31,7 @@ struct StatusMenuHostedSubmenuRefreshTests {
                 id: "api",
                 name: "API",
                 indicator: .none,
-                statusLabel: "Operational"),
+                status: "operational"),
         ]
 
         #expect(controller.menuAdjunctReadinessSignature() != before)

@@ -38,6 +38,7 @@ struct StatuspageSummaryTests {
         #expect(components.map(\.name) == ["Codex API", "CLI", "FedRAMP"])
         #expect(components.map(\.indicator) == [.critical, .none, .minor])
         #expect(components.allSatisfy { !$0.isGroup })
+        #expect(components.last?.status == "degraded_performance")
         #expect(components.last?.statusLabel == L("status_degraded"))
     }
 
@@ -193,10 +194,12 @@ struct StatuspageSummaryTests {
         let fedramp = result.components[1]
         #expect(fedramp.isGroup)
         #expect(fedramp.indicator == .minor) // aggregates the degraded child
+        #expect(fedramp.status == "degraded_performance")
         #expect(fedramp.statusLabel == L("status_degraded"))
 
         #expect(result.components[2].isGroup == false) // standalone component
         #expect(result.components[2].indicator == .critical)
+        #expect(result.components[2].status == "full_outage")
         #expect(result.components[2].statusLabel == L("status_major_outage"))
 
         // Overall page status reflects the worst leaf (standalone full outage).
