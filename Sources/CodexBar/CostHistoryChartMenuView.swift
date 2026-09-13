@@ -226,7 +226,7 @@ struct CostHistoryChartMenuView: View {
                             .pickerStyle(.segmented)
                             .controlSize(.small)
                             .labelsHidden()
-                            .frame(width: Self.metricPickerWidth, height: Self.metricPickerHeight)
+                            .frame(width: Self.metricPickerWidth, height: Self.metricPickerHeight, alignment: .trailing)
                             .accessibilityLabel(L("Display mode"))
                         }
                     }
