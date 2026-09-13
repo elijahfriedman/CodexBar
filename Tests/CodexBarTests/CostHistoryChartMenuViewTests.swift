@@ -1183,10 +1183,9 @@ extension CostHistoryChartMenuViewTests {
         #expect(first != second)
     }
 
-    @Test
+    @Test(arguments: [CGFloat(296), CGFloat(360)])
     @MainActor
-    func `metric picker trailing edge aligns with the chart's content edge`() {
-        let width: CGFloat = 296
+    func `metric picker trailing edge aligns with the chart's content edge`(width: CGFloat) throws {
         let daily = [
             Self.dailyEntry(date: "2026-08-12", totalTokens: 1_250_000, costUSD: 1.25),
             Self.dailyEntry(date: "2026-08-13", totalTokens: 2_500_000, costUSD: 2.5),
@@ -1197,18 +1196,27 @@ extension CostHistoryChartMenuViewTests {
             totalCostUSD: 3.75,
             hidePersonalInfo: false,
             width: width)
-        let hosting = NSHostingView(rootView: AnyView(chart))
+        let hosting = NSHostingView(rootView: AnyView(chart
+                .environment(\.colorScheme, .light)
+                .background(Color.white)))
+        hosting.appearance = NSAppearance(named: .aqua)
         hosting.frame = NSRect(x: 0, y: 0, width: width, height: 1)
         hosting.layoutSubtreeIfNeeded()
         hosting.frame = NSRect(origin: .zero, size: hosting.fittingSize)
         hosting.layoutSubtreeIfNeeded()
 
-        let control = try? #require(Self.descendant(of: hosting, as: NSSegmentedControl.self))
-        let controlFrameInHosting = control.map { $0.convert($0.bounds, to: hosting) }
+        let control = try #require(Self.descendant(of: hosting, as: NSSegmentedControl.self))
+        let controlFrameInHosting = control.convert(control.bounds, to: hosting)
 
         // The chart content uses a 16pt horizontal inset; the picker's trailing edge should
         // land on that same content edge rather than floating inside its wider reserved frame.
-        #expect(controlFrameInHosting.map { abs($0.maxX - (width - 16)) } ?? .infinity <= 1)
+        #expect(abs(controlFrameInHosting.maxX - (width - 16)) <= 1)
+        if let directory = ProcessInfo.processInfo.environment["CODEXBAR_CHART_PICKER_SCREENSHOT_DIR"] {
+            let png = try #require(MenuLayoutScreenshotRenderTests.pngDataWithWindow(hosting: hosting))
+            let url = URL(fileURLWithPath: directory, isDirectory: true)
+            try FileManager.default.createDirectory(at: url, withIntermediateDirectories: true)
+            try png.write(to: url.appendingPathComponent("picker-\(Int(width)).png"))
+        }
     }
 
     @MainActor
