@@ -1633,3 +1633,14 @@
 "antigravity_cost_estimate_hint" = "การใช้งานในเครื่อง × ราคา API สาธารณะ · ไม่ใช่ค่าบริการหรือเครดิตของ Antigravity";
 "antigravity_quota_window_note" = "ค่าใช้จ่ายของหน้าต่างครอบคลุมทุกโมเดล · หน้าต่างที่แสดงคือกลุ่มที่จำกัดมากที่สุด";
 "antigravity_no_priced_token_history" = "ไม่มีประวัติโทเคน Antigravity ที่คิดราคาไว้";
+"Move to Trash…" = "ย้ายไปที่ถังขยะ…";
+"Move to Trash" = "ย้ายไปที่ถังขยะ";
+"storage_cleanup_confirm_title" = "ย้าย “%@” (%@) ไปที่ถังขยะหรือไม่";
+"storage_cleanup_trash_recoverable" = "คุณสามารถกู้คืนได้จากถังขยะ";
+"storage_cleanup_failed_title" = "ไม่สามารถย้ายไปที่ถังขยะได้";
+"storage_cleanup_outside_root" = "รายการนี้อยู่นอกโฟลเดอร์ข้อมูลของผู้ให้บริการ CodexBar จึงจะไม่ลบ";
+"Manage Storage in Settings…" = "จัดการพื้นที่จัดเก็บในการตั้งค่า…";
+"storage_scan_title" = "สแกนพื้นที่จัดเก็บของผู้ให้บริการ";
+"storage_scan_subtitle" = "วัดพื้นที่ดิสก์ที่ข้อมูลในเครื่องของผู้ให้บริการแต่ละรายใช้ ทำงานในเบื้องหลัง";
+"storage_show_in_menu_title" = "แสดงพื้นที่จัดเก็บในเมนู";
+"storage_show_in_menu_subtitle" = "เพิ่มแถวพื้นที่จัดเก็บพร้อมรายละเอียดในเมนูของผู้ให้บริการแต่ละราย";

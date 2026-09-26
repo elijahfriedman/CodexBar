@@ -1631,3 +1631,14 @@
 "antigravity_cost_estimate_hint" = "Yerel kullanım × herkese açık API fiyatları · Antigravity ücretleri veya kredileri değildir";
 "antigravity_quota_window_note" = "Pencere maliyeti tüm modelleri kapsar · gösterilen pencere en kısıtlı ailedir";
 "antigravity_no_priced_token_history" = "Fiyatlandırılmış Antigravity token geçmişi yok.";
+"Move to Trash…" = "Çöp Sepetine Taşı…";
+"Move to Trash" = "Çöp Sepetine Taşı";
+"storage_cleanup_confirm_title" = "“%@” (%@) Çöp Sepetine taşınsın mı?";
+"storage_cleanup_trash_recoverable" = "Çöp Sepetinden geri yükleyebilirsiniz.";
+"storage_cleanup_failed_title" = "Çöp Sepetine Taşınamadı";
+"storage_cleanup_outside_root" = "Bu öğe sağlayıcının veri klasörünün dışında olduğundan CodexBar onu kaldırmaz.";
+"Manage Storage in Settings…" = "Depolamayı Ayarlarda Yönet…";
+"storage_scan_title" = "Sağlayıcı depolamasını tara";
+"storage_scan_subtitle" = "Her sağlayıcının yerel verilerinin ne kadar disk alanı kullandığını ölçer. Arka planda çalışır.";
+"storage_show_in_menu_title" = "Depolamayı menüde göster";
+"storage_show_in_menu_subtitle" = "Her sağlayıcının menüsüne döküm içeren bir Depolama satırı ekler.";

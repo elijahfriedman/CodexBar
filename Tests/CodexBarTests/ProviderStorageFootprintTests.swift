@@ -407,7 +407,7 @@ struct ProviderStorageFootprintTests {
 
     @Test
     @MainActor
-    func `storage refresh is opt in and clears stale footprints when disabled`() async throws {
+    func `storage scan is on by default, menu row is opt in, and disabling scan clears footprints`() async throws {
         let home = try Self.makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: home) }
 
@@ -433,16 +433,22 @@ struct ProviderStorageFootprintTests {
             environmentBase: ["CODEX_HOME": codexHome.path])
         store.managedCodexAccountsForStorageOverride = []
 
-        await store.refreshStorageFootprintsForOverviewNow()
-        #expect(store.storageFootprint(for: .codex) == nil)
-
-        settings.providerStorageFootprintsEnabled = true
+        // Scanning is on by default and feeds Settings; the menu row stays opt-in.
+        #expect(settings.providerStorageScanEnabled)
+        #expect(!settings.providerStorageFootprintsEnabled)
         await store.refreshStorageFootprintsForOverviewNow()
         #expect(store.storageFootprint(for: .codex)?.totalBytes == 16)
+        #expect(store.menuStorageFootprint(for: .codex) == nil)
 
-        settings.providerStorageFootprintsEnabled = false
+        settings.providerStorageFootprintsEnabled = true
+        #expect(store.menuStorageFootprint(for: .codex)?.totalBytes == 16)
+
+        // Turning scanning off clears results and switches the menu row off too.
+        settings.providerStorageScanEnabled = false
         await store.refreshStorageFootprintsForOverviewNow()
+        #expect(!settings.providerStorageFootprintsEnabled)
         #expect(store.storageFootprint(for: .codex) == nil)
+        #expect(store.menuStorageFootprint(for: .codex) == nil)
         #expect(store.providerStorageFootprints.isEmpty)
     }
 

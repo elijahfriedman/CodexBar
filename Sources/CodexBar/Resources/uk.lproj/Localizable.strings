@@ -1629,3 +1629,14 @@
 "antigravity_cost_estimate_hint" = "Локальне використання × публічні ціни API · це не рахунки та не кредити Antigravity";
 "antigravity_quota_window_note" = "Вартість вікна охоплює всі моделі · показано вікно найбільш обмеженої родини";
 "antigravity_no_priced_token_history" = "Немає оціненої історії токенів Antigravity.";
+"Move to Trash…" = "Перемістити в Смітник…";
+"Move to Trash" = "Перемістити в Смітник";
+"storage_cleanup_confirm_title" = "Перемістити «%@» (%@) у Смітник?";
+"storage_cleanup_trash_recoverable" = "Його можна відновити зі Смітника.";
+"storage_cleanup_failed_title" = "Не вдалося перемістити в Смітник";
+"storage_cleanup_outside_root" = "Цей елемент поза текою даних провайдера, тому CodexBar не видалятиме його.";
+"Manage Storage in Settings…" = "Керувати сховищем у Налаштуваннях…";
+"storage_scan_title" = "Сканувати сховище провайдерів";
+"storage_scan_subtitle" = "Вимірює, скільки місця на диску займають локальні дані кожного провайдера. Працює у фоні.";
+"storage_show_in_menu_title" = "Показувати сховище в меню";
+"storage_show_in_menu_subtitle" = "Додає рядок «Сховище» з розбивкою до меню кожного провайдера.";

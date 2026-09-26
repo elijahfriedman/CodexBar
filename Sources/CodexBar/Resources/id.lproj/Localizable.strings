@@ -1632,3 +1632,14 @@
 "antigravity_cost_estimate_hint" = "Penggunaan lokal × harga API publik · bukan tagihan atau kredit Antigravity";
 "antigravity_quota_window_note" = "Biaya jendela mencakup semua model · jendela yang ditampilkan adalah keluarga paling terbatas";
 "antigravity_no_priced_token_history" = "Tidak ada riwayat token Antigravity berharga yang tersedia.";
+"Move to Trash…" = "Pindahkan ke Tong Sampah…";
+"Move to Trash" = "Pindahkan ke Tong Sampah";
+"storage_cleanup_confirm_title" = "Pindahkan “%@” (%@) ke Tong Sampah?";
+"storage_cleanup_trash_recoverable" = "Anda dapat memulihkannya dari Tong Sampah.";
+"storage_cleanup_failed_title" = "Tidak Dapat Memindahkan ke Tong Sampah";
+"storage_cleanup_outside_root" = "Item ini berada di luar folder data penyedia, jadi CodexBar tidak akan menghapusnya.";
+"Manage Storage in Settings…" = "Kelola Penyimpanan di Pengaturan…";
+"storage_scan_title" = "Pindai penyimpanan penyedia";
+"storage_scan_subtitle" = "Mengukur ruang disk yang digunakan data lokal setiap penyedia. Berjalan di latar belakang.";
+"storage_show_in_menu_title" = "Tampilkan penyimpanan di menu";
+"storage_show_in_menu_subtitle" = "Menambahkan baris Penyimpanan beserta rinciannya ke menu setiap penyedia.";

@@ -1630,3 +1630,14 @@
 "antigravity_cost_estimate_hint" = "Mức dùng cục bộ × giá API công khai · không phải phí hay tín dụng Antigravity";
 "antigravity_quota_window_note" = "Chi phí cửa sổ bao gồm mọi mô hình · cửa sổ hiển thị là nhóm bị giới hạn nhất";
 "antigravity_no_priced_token_history" = "Không có lịch sử token Antigravity được định giá.";
+"Move to Trash…" = "Chuyển vào Thùng rác…";
+"Move to Trash" = "Chuyển vào Thùng rác";
+"storage_cleanup_confirm_title" = "Chuyển “%@” (%@) vào Thùng rác?";
+"storage_cleanup_trash_recoverable" = "Bạn có thể khôi phục từ Thùng rác.";
+"storage_cleanup_failed_title" = "Không thể chuyển vào Thùng rác";
+"storage_cleanup_outside_root" = "Mục này nằm ngoài thư mục dữ liệu của nhà cung cấp nên CodexBar sẽ không xóa.";
+"Manage Storage in Settings…" = "Quản lý dung lượng trong Cài đặt…";
+"storage_scan_title" = "Quét dung lượng của nhà cung cấp";
+"storage_scan_subtitle" = "Đo dung lượng đĩa mà dữ liệu cục bộ của mỗi nhà cung cấp sử dụng. Chạy trong nền.";
+"storage_show_in_menu_title" = "Hiển thị dung lượng trong menu";
+"storage_show_in_menu_subtitle" = "Thêm hàng Dung lượng kèm chi tiết vào menu của mỗi nhà cung cấp.";

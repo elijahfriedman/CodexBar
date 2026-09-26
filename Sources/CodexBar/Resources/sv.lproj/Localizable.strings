@@ -1628,3 +1628,14 @@
 "antigravity_cost_estimate_hint" = "Lokal användning × publika API-priser · inte Antigravity-avgifter eller krediter";
 "antigravity_quota_window_note" = "Fönsterkostnaden omfattar alla modeller · fönstret som visas är den mest begränsade familjen";
 "antigravity_no_priced_token_history" = "Ingen prissatt Antigravity-tokenhistorik tillgänglig.";
+"Move to Trash…" = "Flytta till papperskorgen…";
+"Move to Trash" = "Flytta till papperskorgen";
+"storage_cleanup_confirm_title" = "Flytta ”%@” (%@) till papperskorgen?";
+"storage_cleanup_trash_recoverable" = "Du kan återställa det från papperskorgen.";
+"storage_cleanup_failed_title" = "Kunde inte flytta till papperskorgen";
+"storage_cleanup_outside_root" = "Objektet ligger utanför leverantörens datamapp, så CodexBar tar inte bort det.";
+"Manage Storage in Settings…" = "Hantera lagring i Inställningar…";
+"storage_scan_title" = "Skanna leverantörslagring";
+"storage_scan_subtitle" = "Mäter hur mycket diskutrymme varje leverantörs lokala data använder. Körs i bakgrunden.";
+"storage_show_in_menu_title" = "Visa lagring i menyn";
+"storage_show_in_menu_subtitle" = "Lägger till en lagringsrad med fördelning i varje leverantörs meny.";

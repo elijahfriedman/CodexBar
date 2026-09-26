@@ -1633,3 +1633,14 @@
 "antigravity_cost_estimate_hint" = "Local usage × public API prices · not Antigravity charges or credits";
 "antigravity_quota_window_note" = "Window cost covers all models · window shown is the most constrained family";
 "antigravity_no_priced_token_history" = "No priced Antigravity token history is available.";
+"Move to Trash…" = "Move to Trash…";
+"Move to Trash" = "Move to Trash";
+"storage_cleanup_confirm_title" = "Move “%@” (%@) to the Trash?";
+"storage_cleanup_trash_recoverable" = "You can restore it from the Trash.";
+"storage_cleanup_failed_title" = "Couldn’t Move to Trash";
+"storage_cleanup_outside_root" = "This item is outside the provider’s data folder, so CodexBar won’t remove it.";
+"Manage Storage in Settings…" = "Manage Storage in Settings…";
+"storage_scan_title" = "Scan provider storage";
+"storage_scan_subtitle" = "Measures how much disk space each provider’s local data uses. Runs in the background.";
+"storage_show_in_menu_title" = "Show storage in menu";
+"storage_show_in_menu_subtitle" = "Adds a Storage row with the breakdown to each provider’s menu.";

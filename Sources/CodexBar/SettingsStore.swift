@@ -646,6 +646,10 @@ extension SettingsStore {
                 fallback: false,
                 from: userDefaults),
             backgroundWorkLowPowerModePreference: backgroundWorkLowPowerModePreference,
+            providerStorageScanEnabled: Self.loadBoolDefault(
+                "providerStorageScanEnabled",
+                fallback: true,
+                from: userDefaults),
             providerStorageFootprintsEnabled: Self.loadBoolDefault(
                 "providerStorageFootprintsEnabled",
                 fallback: false,
