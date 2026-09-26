@@ -498,6 +498,9 @@ extension SettingsStore {
         let refreshFrequency = Self.loadRefreshFrequency(
             userDefaults: userDefaults,
             hadPreviousInstallationState: hadPreviousInstallationState)
+        let providerStorageScanEnabled = Self.loadProviderStorageScanEnabled(
+            userDefaults: userDefaults,
+            hadPreviousInstallationState: hadPreviousInstallationState)
         let adaptiveActivityScanConsent = Self.loadAdaptiveActivityScanConsent(userDefaults: userDefaults)
         let debugDisableKeychainAccess = Self.loadDebugDisableKeychainAccess(userDefaults: userDefaults)
         let debugLogLevelRaw = userDefaults.string(forKey: "debugLogLevel") ?? CodexBarLog.Level.verbose.rawValue
@@ -646,10 +649,7 @@ extension SettingsStore {
                 fallback: false,
                 from: userDefaults),
             backgroundWorkLowPowerModePreference: backgroundWorkLowPowerModePreference,
-            providerStorageScanEnabled: Self.loadBoolDefault(
-                "providerStorageScanEnabled",
-                fallback: true,
-                from: userDefaults),
+            providerStorageScanEnabled: providerStorageScanEnabled,
             providerStorageFootprintsEnabled: Self.loadBoolDefault(
                 "providerStorageFootprintsEnabled",
                 fallback: false,
@@ -707,6 +707,24 @@ extension SettingsStore {
         let frequency: RefreshFrequency = rawValue == nil && !hadPreviousInstallationState ? .adaptive : .fiveMinutes
         userDefaults.set(frequency.rawValue, forKey: "refreshFrequency")
         return frequency
+    }
+
+    private static func loadProviderStorageScanEnabled(
+        userDefaults: UserDefaults,
+        hadPreviousInstallationState: Bool) -> Bool
+    {
+        if let stored = userDefaults.object(forKey: "providerStorageScanEnabled") as? Bool {
+            return stored
+        }
+
+        // Scanning used to be gated by the opt-in `providerStorageFootprintsEnabled` toggle. Upgraded installs
+        // inherit that choice (off unless they opted in), so nobody starts scanning without having asked;
+        // only fresh installs get the new default-on scan.
+        let enabled = hadPreviousInstallationState
+            ? userDefaults.object(forKey: "providerStorageFootprintsEnabled") as? Bool ?? false
+            : true
+        userDefaults.set(enabled, forKey: "providerStorageScanEnabled")
+        return enabled
     }
 
     private static func loadLowPowerModePreference(userDefaults: UserDefaults) -> LowPowerModePreference {
