@@ -407,7 +407,7 @@ struct ProviderStorageFootprintTests {
 
     @Test
     @MainActor
-    func `storage scan is on by default, menu row is opt in, and disabling scan clears footprints`() async throws {
+    func `storage scan is on by default, menu row is opt in, and scan off-on keeps the menu choice`() async throws {
         let home = try Self.makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: home) }
 
@@ -443,13 +443,19 @@ struct ProviderStorageFootprintTests {
         settings.providerStorageFootprintsEnabled = true
         #expect(store.menuStorageFootprint(for: .codex)?.totalBytes == 16)
 
-        // Turning scanning off clears results and switches the menu row off too.
+        // Turning scanning off clears results and hides the menu row without overwriting the saved preference.
         settings.providerStorageScanEnabled = false
         await store.refreshStorageFootprintsForOverviewNow()
-        #expect(!settings.providerStorageFootprintsEnabled)
+        #expect(settings.providerStorageFootprintsEnabled)
+        #expect(defaults.object(forKey: "providerStorageFootprintsEnabled") as? Bool == true)
         #expect(store.storageFootprint(for: .codex) == nil)
         #expect(store.menuStorageFootprint(for: .codex) == nil)
         #expect(store.providerStorageFootprints.isEmpty)
+
+        // Turning scanning back on restores the previous menu choice.
+        settings.providerStorageScanEnabled = true
+        await store.refreshStorageFootprintsForOverviewNow()
+        #expect(store.menuStorageFootprint(for: .codex)?.totalBytes == 16)
     }
 
     @Test

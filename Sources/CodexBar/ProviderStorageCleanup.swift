@@ -29,7 +29,7 @@ enum ProviderStorageCleanup {
         ]
         let target: URL
         do {
-            target = try self.validatedTarget(recommendation.path, roots: footprint.paths, fileManager: fileManager)
+            target = try self.validatedTarget(recommendation.path, footprint: footprint, fileManager: fileManager)
         } catch {
             logger.warning("Storage cleanup refused: outside scanned provider root", metadata: metadata)
             throw error
@@ -38,19 +38,20 @@ enum ProviderStorageCleanup {
         logger.info("Storage cleanup moved item to Trash", metadata: metadata)
     }
 
-    /// Binds cleanup to the roots exactly as scanned. `ProviderStorageScanner` never descends through a
-    /// symlinked root, so every recommendation was found under real directories. Paths are compared as written
-    /// (never resolved), and the root plus every component down to the target must still be a real, non-symlink
-    /// item. A root swapped for a symlink after scanning, a symlinked intermediate folder, a symlinked target,
-    /// the root itself, and anything outside a root are all refused.
+    /// Binds cleanup to the objects that were scanned, not just their paths:
+    /// - paths are compared as written (never symlink-resolved), and the target must be strictly inside a root;
+    /// - the root and every component down to the target must still be real, non-symlink items
+    ///   (`ProviderStorageScanner` never descends through a symlinked root);
+    /// - the live root and target must be the same on-disk objects (device + inode) the scan recorded, so a root
+    ///   or target replaced after scanning — by a symlink or by another ordinary directory — is refused.
     static func validatedTarget(
         _ path: String,
-        roots: [String],
+        footprint: ProviderStorageFootprint,
         fileManager: FileManager = .default) throws -> URL
     {
         let target = URL(fileURLWithPath: path).standardizedFileURL
         let targetComponents = target.pathComponents
-        for root in roots {
+        for root in footprint.paths {
             let rootURL = URL(fileURLWithPath: root).standardizedFileURL
             let rootComponents = rootURL.pathComponents
             guard targetComponents.count > rootComponents.count,
@@ -64,6 +65,16 @@ enum ProviderStorageCleanup {
                 guard self.isRealItem(current, fileManager: fileManager) else {
                     throw Failure.outsideProviderRoots
                 }
+            }
+
+            guard let scannedRoot = footprint.rootIdentities[root],
+                  ProviderStorageFileIdentity.current(atPath: rootURL.path, fileManager: fileManager) == scannedRoot,
+                  let scannedTarget = footprint.components
+                      .first(where: { URL(fileURLWithPath: $0.path).standardizedFileURL == target })?.identity,
+                      ProviderStorageFileIdentity
+                          .current(atPath: target.path, fileManager: fileManager) == scannedTarget
+            else {
+                throw Failure.outsideProviderRoots
             }
             return target
         }

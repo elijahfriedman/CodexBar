@@ -1633,7 +1633,7 @@
 "storage_cleanup_confirm_title" = "Placer « %@ » (%@) dans la corbeille ?";
 "storage_cleanup_trash_recoverable" = "Vous pouvez le restaurer depuis la corbeille.";
 "storage_cleanup_failed_title" = "Impossible de placer dans la corbeille";
-"storage_cleanup_outside_root" = "Cet élément se trouve hors du dossier de données du fournisseur ; CodexBar ne le supprimera pas.";
+"storage_cleanup_outside_root" = "Cet élément a changé depuis l’analyse ou se trouve hors du dossier de données du fournisseur ; CodexBar ne le supprimera pas. Actualisez puis réessayez.";
 "Manage Storage in Settings…" = "Gérer le stockage dans les réglages…";
 "storage_scan_title" = "Analyser le stockage des fournisseurs";
 "storage_scan_subtitle" = "Mesure l’espace disque utilisé par les données locales de chaque fournisseur. S’exécute en arrière-plan.";

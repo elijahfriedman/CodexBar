@@ -1637,7 +1637,7 @@
 "storage_cleanup_confirm_title" = "Przenieść „%@” (%@) do kosza?";
 "storage_cleanup_trash_recoverable" = "Możesz przywrócić to z kosza.";
 "storage_cleanup_failed_title" = "Nie można przenieść do kosza";
-"storage_cleanup_outside_root" = "Ten element znajduje się poza folderem danych dostawcy, więc CodexBar go nie usunie.";
+"storage_cleanup_outside_root" = "Ten element zmienił się od skanowania lub znajduje się poza folderem danych dostawcy, więc CodexBar go nie usunie. Odśwież i spróbuj ponownie.";
 "Manage Storage in Settings…" = "Zarządzaj pamięcią w Ustawieniach…";
 "storage_scan_title" = "Skanuj pamięć dostawców";
 "storage_scan_subtitle" = "Mierzy, ile miejsca na dysku zajmują lokalne dane każdego dostawcy. Działa w tle.";

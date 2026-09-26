@@ -141,7 +141,7 @@ extension StatusItemController {
         if self.isMenuRefreshEnabled, (provider?.instanceID ?? self.lastMenuProvider) == .codex {
             self.deferOpenAIDashboardRefreshUntilMenuCloses(reason: "parent menu open")
         }
-        if self.settings.providerStorageFootprintsEnabled {
+        if self.settings.providerStorageScanEnabled, self.settings.providerStorageFootprintsEnabled {
             self.store.refreshStorageFootprintsForOverview()
         }
 

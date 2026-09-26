@@ -1603,7 +1603,7 @@
 "storage_cleanup_confirm_title" = "“%@”(%@)을(를) 휴지통으로 이동할까요?";
 "storage_cleanup_trash_recoverable" = "휴지통에서 복원할 수 있습니다.";
 "storage_cleanup_failed_title" = "휴지통으로 이동할 수 없음";
-"storage_cleanup_outside_root" = "이 항목은 제공자의 데이터 폴더 밖에 있으므로 CodexBar가 제거하지 않습니다.";
+"storage_cleanup_outside_root" = "이 항목은 검사 이후 변경되었거나 제공자의 데이터 폴더 밖에 있으므로 CodexBar가 제거하지 않습니다. 새로 고친 후 다시 시도하세요.";
 "Manage Storage in Settings…" = "설정에서 저장 공간 관리…";
 "storage_scan_title" = "제공자 저장 공간 검사";
 "storage_scan_subtitle" = "각 제공자의 로컬 데이터가 사용하는 디스크 공간을 측정합니다. 백그라운드에서 실행됩니다.";

@@ -1665,7 +1665,7 @@
 "storage_cleanup_confirm_title" = "要將「%@」（%@）丟到垃圾桶嗎？";
 "storage_cleanup_trash_recoverable" = "你可以從垃圾桶復原。";
 "storage_cleanup_failed_title" = "無法丟到垃圾桶";
-"storage_cleanup_outside_root" = "此項目不在供應商的資料檔案夾內，因此 CodexBar 不會移除它。";
+"storage_cleanup_outside_root" = "此項目自掃描後已變更或不在供應商的資料檔案夾內，因此 CodexBar 不會移除它。請重新整理後再試一次。";
 "Manage Storage in Settings…" = "在設定中管理儲存空間…";
 "storage_scan_title" = "掃描供應商儲存空間";
 "storage_scan_subtitle" = "測量每個供應商的本機資料所使用的磁碟空間。在背景執行。";

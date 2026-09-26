@@ -1634,7 +1634,7 @@
 "storage_cleanup_confirm_title" = "Mover “%@” (%@) para o Lixo?";
 "storage_cleanup_trash_recoverable" = "Você pode restaurá-lo a partir do Lixo.";
 "storage_cleanup_failed_title" = "Não foi possível mover para o Lixo";
-"storage_cleanup_outside_root" = "Este item está fora da pasta de dados do provedor, então o CodexBar não vai removê-lo.";
+"storage_cleanup_outside_root" = "Este item mudou desde a análise ou está fora da pasta de dados do provedor, então o CodexBar não vai removê-lo. Atualize e tente novamente.";
 "Manage Storage in Settings…" = "Gerenciar armazenamento nos Ajustes…";
 "storage_scan_title" = "Analisar armazenamento dos provedores";
 "storage_scan_subtitle" = "Mede quanto espaço em disco os dados locais de cada provedor usam. Roda em segundo plano.";

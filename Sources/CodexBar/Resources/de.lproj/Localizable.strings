@@ -1634,7 +1634,7 @@
 "storage_cleanup_confirm_title" = "„%@“ (%@) in den Papierkorb legen?";
 "storage_cleanup_trash_recoverable" = "Du kannst es aus dem Papierkorb wiederherstellen.";
 "storage_cleanup_failed_title" = "Konnte nicht in den Papierkorb gelegt werden";
-"storage_cleanup_outside_root" = "Dieses Objekt liegt außerhalb des Datenordners des Anbieters, daher entfernt CodexBar es nicht.";
+"storage_cleanup_outside_root" = "Dieses Objekt hat sich seit dem Scan geändert oder liegt außerhalb des Datenordners des Anbieters, daher entfernt CodexBar es nicht. Aktualisiere und versuche es erneut.";
 "Manage Storage in Settings…" = "Speicher in den Einstellungen verwalten…";
 "storage_scan_title" = "Anbieterspeicher scannen";
 "storage_scan_subtitle" = "Misst, wie viel Speicherplatz die lokalen Daten jedes Anbieters belegen. Läuft im Hintergrund.";

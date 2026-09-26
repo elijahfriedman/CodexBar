@@ -1633,7 +1633,7 @@
 "storage_cleanup_confirm_title" = "“%@” (%@) naar de prullenmand verplaatsen?";
 "storage_cleanup_trash_recoverable" = "Je kunt het terugzetten vanuit de prullenmand.";
 "storage_cleanup_failed_title" = "Kan niet naar prullenmand verplaatsen";
-"storage_cleanup_outside_root" = "Dit onderdeel staat buiten de gegevensmap van de aanbieder, dus CodexBar verwijdert het niet.";
+"storage_cleanup_outside_root" = "Dit onderdeel is gewijzigd sinds de scan of staat buiten de gegevensmap van de aanbieder, dus CodexBar verwijdert het niet. Vernieuw en probeer het opnieuw.";
 "Manage Storage in Settings…" = "Beheer opslag in Instellingen…";
 "storage_scan_title" = "Opslag van aanbieders scannen";
 "storage_scan_subtitle" = "Meet hoeveel schijfruimte de lokale gegevens van elke aanbieder gebruiken. Draait op de achtergrond.";

@@ -1633,7 +1633,7 @@
 "storage_cleanup_confirm_title" = "Queres mover “%@” (%@) ao lixo?";
 "storage_cleanup_trash_recoverable" = "Podes restauralo desde o lixo.";
 "storage_cleanup_failed_title" = "Non se puido mover ao lixo";
-"storage_cleanup_outside_root" = "Este elemento está fóra do cartafol de datos do provedor, así que CodexBar non o eliminará.";
+"storage_cleanup_outside_root" = "Este elemento cambiou desde que se analizou ou está fóra do cartafol de datos do provedor, así que CodexBar non o eliminará. Actualiza e téntao de novo.";
 "Manage Storage in Settings…" = "Xestionar o almacenamento en Axustes…";
 "storage_scan_title" = "Analizar o almacenamento dos provedores";
 "storage_scan_subtitle" = "Mide canto espazo en disco usan os datos locais de cada provedor. Execútase en segundo plano.";

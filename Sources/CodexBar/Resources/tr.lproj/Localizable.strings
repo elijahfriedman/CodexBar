@@ -1636,7 +1636,7 @@
 "storage_cleanup_confirm_title" = "“%@” (%@) Çöp Sepetine taşınsın mı?";
 "storage_cleanup_trash_recoverable" = "Çöp Sepetinden geri yükleyebilirsiniz.";
 "storage_cleanup_failed_title" = "Çöp Sepetine Taşınamadı";
-"storage_cleanup_outside_root" = "Bu öğe sağlayıcının veri klasörünün dışında olduğundan CodexBar onu kaldırmaz.";
+"storage_cleanup_outside_root" = "Bu öğe taramadan sonra değişti veya sağlayıcının veri klasörünün dışında, bu yüzden CodexBar onu kaldırmaz. Yenileyip tekrar deneyin.";
 "Manage Storage in Settings…" = "Depolamayı Ayarlarda Yönet…";
 "storage_scan_title" = "Sağlayıcı depolamasını tara";
 "storage_scan_subtitle" = "Her sağlayıcının yerel verilerinin ne kadar disk alanı kullandığını ölçer. Arka planda çalışır.";

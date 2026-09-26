@@ -149,8 +149,10 @@ model-generic token label while the rendered menu-bar prefix and accessibility l
   in narrow menus. Credits and plan history reserve plot-edge space to avoid clipping; token/cost and usage-breakdown
   charts retain their automatic scale range. Shared styling uses a
   bar-centered anchor, and each chart retains its own date formatting, domain, and tick-selection behavior.
-- Provider storage usage is opt-in from Advanced settings. When enabled, overview rows and provider detail cards can show
-  local provider-owned storage totals, with a submenu for path breakdowns and copyable paths.
+- Provider storage lives in Settings → Storage: an all-providers total bar, per-provider breakdowns, and cleanup ideas.
+  The menu Storage row is a separate opt-in (“Show storage in menu”, default off). When enabled, overview rows and
+  provider detail cards show local provider-owned storage totals, with a submenu for path breakdowns, copyable paths,
+  and “Manage Storage in Settings…”.
 
 ## Pace tracking
 
@@ -171,8 +173,11 @@ Runs out tokens remain hidden until 3% of their window has elapsed.
 
 ## Preferences notes
 - Advanced: “Disable Keychain access” turns off browser cookie import; paste Cookie headers manually in Providers.
-- Advanced: “Show provider storage usage” enables background scans of known provider-owned local paths; CodexBar only
-  reports sizes and cleanup ideas, it does not delete files.
+- Storage: “Scan provider storage” enables background scans of known provider-owned local paths (default on for fresh
+  installs; upgraded installs keep their previous opt-in). “Show storage in menu” (default off) adds the menu row and
+  reads as off while scanning is off, without losing the saved choice. Cleanup ideas offer Move to Trash after a
+  confirmation; CodexBar only trashes a scanned component when the root and target are still the same on-disk objects
+  it scanned, never permanently deletes, and never touches paths outside the provider root.
 - Display: “Overview tab providers” controls which providers appear in Merge Icons → Overview (up to 6).
 - If no providers are selected for Overview, the Overview tab is hidden.
 - Providers → Claude: “Avoid Keychain prompts” selects the Security.framework reader's `Never prompt` policy.

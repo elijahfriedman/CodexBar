@@ -1,15 +1,38 @@
 import Foundation
 
+/// The on-disk object a path named when it was scanned (device + inode, read without following symlinks).
+/// Cleanup compares it with the live object so a path that now names a different directory or file is refused.
+public struct ProviderStorageFileIdentity: Sendable, Hashable {
+    public let device: UInt64
+    public let inode: UInt64
+
+    public init(device: UInt64, inode: UInt64) {
+        self.device = device
+        self.inode = inode
+    }
+
+    public static func current(atPath path: String, fileManager: FileManager = .default) -> Self? {
+        guard let attributes = try? fileManager.attributesOfItem(atPath: path),
+              let device = (attributes[.systemNumber] as? NSNumber)?.uint64Value,
+              let inode = (attributes[.systemFileNumber] as? NSNumber)?.uint64Value
+        else { return nil }
+        return Self(device: device, inode: inode)
+    }
+}
+
 public struct ProviderStorageFootprint: Sendable, Equatable {
     public struct Component: Sendable, Equatable, Identifiable {
         public let id: String
         public let path: String
         public let totalBytes: Int64
+        /// Identity of the component item at scan time; `nil` when it could not be read.
+        public let identity: ProviderStorageFileIdentity?
 
-        public init(path: String, totalBytes: Int64) {
+        public init(path: String, totalBytes: Int64, identity: ProviderStorageFileIdentity? = nil) {
             self.id = path
             self.path = path
             self.totalBytes = totalBytes
+            self.identity = identity
         }
 
         public var name: String {
@@ -26,6 +49,8 @@ public struct ProviderStorageFootprint: Sendable, Equatable {
     public let missingPaths: [String]
     public let unreadablePaths: [String]
     public let components: [Component]
+    /// Identity of each scanned root (keyed by its path in `paths`) at scan time.
+    public let rootIdentities: [String: ProviderStorageFileIdentity]
     public let updatedAt: Date
 
     public init(
@@ -35,6 +60,7 @@ public struct ProviderStorageFootprint: Sendable, Equatable {
         missingPaths: [String],
         unreadablePaths: [String],
         components: [Component] = [],
+        rootIdentities: [String: ProviderStorageFileIdentity] = [:],
         updatedAt: Date)
     {
         self.provider = provider
@@ -43,6 +69,7 @@ public struct ProviderStorageFootprint: Sendable, Equatable {
         self.missingPaths = missingPaths
         self.unreadablePaths = unreadablePaths
         self.components = components
+        self.rootIdentities = rootIdentities
         self.updatedAt = updatedAt
     }
 
@@ -59,7 +86,8 @@ public struct ProviderStorageFootprint: Sendable, Equatable {
             self.paths == other.paths &&
             self.missingPaths == other.missingPaths &&
             self.unreadablePaths == other.unreadablePaths &&
-            self.components == other.components
+            self.components == other.components &&
+            self.rootIdentities == other.rootIdentities
     }
 
     public var cleanupRecommendations: [ProviderStorageRecommendation] {
@@ -74,6 +102,7 @@ public struct ProviderStorageFootprint: Sendable, Equatable {
             missingPaths: self.missingPaths,
             unreadablePaths: self.unreadablePaths,
             components: self.components,
+            rootIdentities: self.rootIdentities,
             updatedAt: self.updatedAt)
     }
 }
@@ -418,6 +447,17 @@ public struct ProviderStorageScanner: @unchecked Sendable {
             }
         }
 
+        var rootIdentities: [String: ProviderStorageFileIdentity] = [:]
+        for path in existingPaths {
+            rootIdentities[path] = ProviderStorageFileIdentity.current(atPath: path, fileManager: self.fileManager)
+        }
+        components = components.map {
+            ProviderStorageFootprint.Component(
+                path: $0.path,
+                totalBytes: $0.totalBytes,
+                identity: ProviderStorageFileIdentity.current(atPath: $0.path, fileManager: self.fileManager))
+        }
+
         return ProviderStorageFootprint(
             provider: provider,
             totalBytes: totalBytes,
@@ -430,6 +470,7 @@ public struct ProviderStorageScanner: @unchecked Sendable {
                 }
                 return lhs.totalBytes > rhs.totalBytes
             },
+            rootIdentities: rootIdentities,
             updatedAt: now)
     }
 

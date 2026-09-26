@@ -26,7 +26,7 @@ struct StoragePane: View {
             }
 
             Section {
-                Toggle(isOn: self.$settings.providerStorageFootprintsEnabled) {
+                Toggle(isOn: self.showInMenuBinding) {
                     SettingsRowLabel(L("storage_show_in_menu_title"), subtitle: L("storage_show_in_menu_subtitle"))
                 }
                 .disabled(!self.settings.providerStorageScanEnabled)
@@ -100,6 +100,14 @@ struct StoragePane: View {
             } message: {
                 Text(self.cleanupError ?? "")
             }
+    }
+
+    /// Reads as off while scanning is off, without overwriting the saved preference, so turning scanning back on
+    /// restores the user's previous menu choice.
+    private var showInMenuBinding: Binding<Bool> {
+        Binding(
+            get: { self.settings.providerStorageScanEnabled && self.settings.providerStorageFootprintsEnabled },
+            set: { self.settings.providerStorageFootprintsEnabled = $0 })
     }
 
     private var cleanupAlertPresented: Binding<Bool> {

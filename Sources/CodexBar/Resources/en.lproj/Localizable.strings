@@ -1638,7 +1638,7 @@
 "storage_cleanup_confirm_title" = "Move “%@” (%@) to the Trash?";
 "storage_cleanup_trash_recoverable" = "You can restore it from the Trash.";
 "storage_cleanup_failed_title" = "Couldn’t Move to Trash";
-"storage_cleanup_outside_root" = "This item is outside the provider’s data folder, so CodexBar won’t remove it.";
+"storage_cleanup_outside_root" = "This item changed since it was scanned or is outside the provider’s data folder, so CodexBar won’t remove it. Refresh and try again.";
 "Manage Storage in Settings…" = "Manage Storage in Settings…";
 "storage_scan_title" = "Scan provider storage";
 "storage_scan_subtitle" = "Measures how much disk space each provider’s local data uses. Runs in the background.";

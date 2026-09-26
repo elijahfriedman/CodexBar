@@ -1638,7 +1638,7 @@
 "storage_cleanup_confirm_title" = "ย้าย “%@” (%@) ไปที่ถังขยะหรือไม่";
 "storage_cleanup_trash_recoverable" = "คุณสามารถกู้คืนได้จากถังขยะ";
 "storage_cleanup_failed_title" = "ไม่สามารถย้ายไปที่ถังขยะได้";
-"storage_cleanup_outside_root" = "รายการนี้อยู่นอกโฟลเดอร์ข้อมูลของผู้ให้บริการ CodexBar จึงจะไม่ลบ";
+"storage_cleanup_outside_root" = "รายการนี้เปลี่ยนไปตั้งแต่สแกนหรืออยู่นอกโฟลเดอร์ข้อมูลของผู้ให้บริการ CodexBar จึงจะไม่ลบ รีเฟรชแล้วลองอีกครั้ง";
 "Manage Storage in Settings…" = "จัดการพื้นที่จัดเก็บในการตั้งค่า…";
 "storage_scan_title" = "สแกนพื้นที่จัดเก็บของผู้ให้บริการ";
 "storage_scan_subtitle" = "วัดพื้นที่ดิสก์ที่ข้อมูลในเครื่องของผู้ให้บริการแต่ละรายใช้ ทำงานในเบื้องหลัง";

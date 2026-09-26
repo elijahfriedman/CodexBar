@@ -1637,7 +1637,7 @@
 "storage_cleanup_confirm_title" = "Pindahkan “%@” (%@) ke Tong Sampah?";
 "storage_cleanup_trash_recoverable" = "Anda dapat memulihkannya dari Tong Sampah.";
 "storage_cleanup_failed_title" = "Tidak Dapat Memindahkan ke Tong Sampah";
-"storage_cleanup_outside_root" = "Item ini berada di luar folder data penyedia, jadi CodexBar tidak akan menghapusnya.";
+"storage_cleanup_outside_root" = "Item ini berubah sejak dipindai atau berada di luar folder data penyedia, jadi CodexBar tidak akan menghapusnya. Segarkan lalu coba lagi.";
 "Manage Storage in Settings…" = "Kelola Penyimpanan di Pengaturan…";
 "storage_scan_title" = "Pindai penyimpanan penyedia";
 "storage_scan_subtitle" = "Mengukur ruang disk yang digunakan data lokal setiap penyedia. Berjalan di latar belakang.";

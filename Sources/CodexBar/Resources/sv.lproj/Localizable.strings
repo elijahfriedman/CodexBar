@@ -1633,7 +1633,7 @@
 "storage_cleanup_confirm_title" = "Flytta ”%@” (%@) till papperskorgen?";
 "storage_cleanup_trash_recoverable" = "Du kan återställa det från papperskorgen.";
 "storage_cleanup_failed_title" = "Kunde inte flytta till papperskorgen";
-"storage_cleanup_outside_root" = "Objektet ligger utanför leverantörens datamapp, så CodexBar tar inte bort det.";
+"storage_cleanup_outside_root" = "Objektet har ändrats sedan skanningen eller ligger utanför leverantörens datamapp, så CodexBar tar inte bort det. Uppdatera och försök igen.";
 "Manage Storage in Settings…" = "Hantera lagring i Inställningar…";
 "storage_scan_title" = "Skanna leverantörslagring";
 "storage_scan_subtitle" = "Mäter hur mycket diskutrymme varje leverantörs lokala data använder. Körs i bakgrunden.";

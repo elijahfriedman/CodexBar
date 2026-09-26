@@ -811,10 +811,6 @@ extension SettingsStore {
         get { self.defaultsState.providerStorageScanEnabled }
         set {
             self.setDefault(\.providerStorageScanEnabled, newValue, key: "providerStorageScanEnabled")
-            // The menu row has nothing to show without a scan, so turning scanning off also turns it off.
-            if !newValue, self.providerStorageFootprintsEnabled {
-                self.providerStorageFootprintsEnabled = false
-            }
             CodexBarLog.logger(LogCategories.settings).info(
                 "Provider storage scan updated",
                 metadata: ["enabled": newValue ? "1" : "0"])
@@ -822,7 +818,8 @@ extension SettingsStore {
         }
     }
 
-    /// Whether storage rows appear in the menu. Keeps its historical key, so earlier opt-ins carry over.
+    /// The saved menu-row preference. Keeps its historical key, so earlier opt-ins carry over. It is never
+    /// rewritten when scanning is toggled; menu visibility is gated on both settings instead.
     var providerStorageFootprintsEnabled: Bool {
         get { self.defaultsState.providerStorageFootprintsEnabled }
         set {
