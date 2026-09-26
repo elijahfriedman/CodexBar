@@ -498,9 +498,7 @@ extension SettingsStore {
         let refreshFrequency = Self.loadRefreshFrequency(
             userDefaults: userDefaults,
             hadPreviousInstallationState: hadPreviousInstallationState)
-        let providerStorageScanEnabled = Self.loadProviderStorageScanEnabled(
-            userDefaults: userDefaults,
-            hadPreviousInstallationState: hadPreviousInstallationState)
+        let providerStorageScanEnabled = Self.loadProviderStorageScanEnabled(userDefaults: userDefaults)
         let adaptiveActivityScanConsent = Self.loadAdaptiveActivityScanConsent(userDefaults: userDefaults)
         let debugDisableKeychainAccess = Self.loadDebugDisableKeychainAccess(userDefaults: userDefaults)
         let debugLogLevelRaw = userDefaults.string(forKey: "debugLogLevel") ?? CodexBarLog.Level.verbose.rawValue
@@ -709,20 +707,14 @@ extension SettingsStore {
         return frequency
     }
 
-    private static func loadProviderStorageScanEnabled(
-        userDefaults: UserDefaults,
-        hadPreviousInstallationState: Bool) -> Bool
-    {
+    private static func loadProviderStorageScanEnabled(userDefaults: UserDefaults) -> Bool {
         if let stored = userDefaults.object(forKey: "providerStorageScanEnabled") as? Bool {
             return stored
         }
 
-        // Scanning used to be gated by the opt-in `providerStorageFootprintsEnabled` toggle. Upgraded installs
-        // inherit that choice (off unless they opted in), so nobody starts scanning without having asked;
-        // only fresh installs get the new default-on scan.
-        let enabled = hadPreviousInstallationState
-            ? userDefaults.object(forKey: "providerStorageFootprintsEnabled") as? Bool ?? false
-            : true
+        // Scanning stays opt-in. It used to be gated by the `providerStorageFootprintsEnabled` toggle, so an
+        // existing opt-in carries over; everyone else, including fresh installs, starts with scanning off.
+        let enabled = userDefaults.object(forKey: "providerStorageFootprintsEnabled") as? Bool ?? false
         userDefaults.set(enabled, forKey: "providerStorageScanEnabled")
         return enabled
     }

@@ -15,6 +15,28 @@ private final class RecordingTrashFileManager: FileManager, @unchecked Sendable 
     }
 }
 
+/// Runs a one-shot swap right after the scanner reads the identity of `path`, simulating an object being replaced
+/// between identity capture and the end of its measurement.
+private final class SwapAfterIdentityFileManager: FileManager, @unchecked Sendable {
+    private let path: String
+    private var swap: (() throws -> Void)?
+
+    init(path: String, swap: @escaping () throws -> Void) {
+        self.path = path
+        self.swap = swap
+        super.init()
+    }
+
+    override func attributesOfItem(atPath path: String) throws -> [FileAttributeKey: Any] {
+        let attributes = try super.attributesOfItem(atPath: path)
+        if path == self.path, let swap = self.swap {
+            self.swap = nil
+            try swap()
+        }
+        return attributes
+    }
+}
+
 struct ProviderStorageCleanupTests {
     private struct Sandbox {
         let base: URL
@@ -189,6 +211,46 @@ struct ProviderStorageCleanupTests {
         try sandbox.makeComponent("debug")
 
         self.expectRefused(scannedChild, footprint: footprint, fileManager: fm)
+    }
+
+    @Test
+    func `component replaced mid-scan does not inherit measured cleanup authority`() throws {
+        let sandbox = try Sandbox()
+        defer { sandbox.remove() }
+        let component = try sandbox.makeComponent("debug")
+        let original = sandbox.base.appendingPathComponent("debug-measured")
+        let scanner = ProviderStorageScanner(fileManager: SwapAfterIdentityFileManager(path: component.path) {
+            try FileManager.default.moveItem(at: component, to: original)
+            try sandbox.makeComponent("debug")
+        })
+
+        let footprint = scanner.scan(provider: .claude, candidatePaths: [sandbox.root.path])
+        #expect(footprint.rootIdentities[sandbox.root.path] != nil)
+        #expect(footprint.components.first { $0.path == component.path }?.identity == nil)
+
+        let fm = RecordingTrashFileManager()
+        self.expectRefused(component, footprint: footprint, fileManager: fm)
+        #expect(FileManager.default.fileExists(atPath: component.appendingPathComponent("data.log").path))
+    }
+
+    @Test
+    func `root replaced mid-scan does not inherit measured cleanup authority`() throws {
+        let sandbox = try Sandbox()
+        defer { sandbox.remove() }
+        let component = try sandbox.makeComponent("debug")
+        let original = sandbox.base.appendingPathComponent(".claude-measured")
+        let scanner = ProviderStorageScanner(fileManager: SwapAfterIdentityFileManager(path: sandbox.root.path) {
+            try FileManager.default.moveItem(at: sandbox.root, to: original)
+            try FileManager.default.createDirectory(at: sandbox.root, withIntermediateDirectories: false)
+            try sandbox.makeComponent("debug")
+        })
+
+        let footprint = scanner.scan(provider: .claude, candidatePaths: [sandbox.root.path])
+        #expect(footprint.rootIdentities[sandbox.root.path] == nil)
+
+        let fm = RecordingTrashFileManager()
+        self.expectRefused(component, footprint: footprint, fileManager: fm)
+        #expect(FileManager.default.fileExists(atPath: component.appendingPathComponent("data.log").path))
     }
 
     @Test

@@ -89,12 +89,12 @@ struct SettingsPersistenceContractTests {
 @MainActor
 struct ProviderStorageScanUpgradeTests {
     @Test
-    func `fresh install scans storage by default`() {
+    func `fresh install keeps storage scanning off`() {
         let defaults = InMemoryUserDefaults(values: [:])
         let settings = testSettingsStore(suiteName: #function, userDefaults: defaults)
-        #expect(settings.providerStorageScanEnabled)
+        #expect(!settings.providerStorageScanEnabled)
         #expect(!settings.providerStorageFootprintsEnabled)
-        #expect(defaults.object(forKey: "providerStorageScanEnabled") as? Bool == true)
+        #expect(defaults.object(forKey: "providerStorageScanEnabled") as? Bool == false)
     }
 
     @Test

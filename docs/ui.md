@@ -173,8 +173,8 @@ Runs out tokens remain hidden until 3% of their window has elapsed.
 
 ## Preferences notes
 - Advanced: “Disable Keychain access” turns off browser cookie import; paste Cookie headers manually in Providers.
-- Storage: “Scan provider storage” enables background scans of known provider-owned local paths (default on for fresh
-  installs; upgraded installs keep their previous opt-in). “Show storage in menu” (default off) adds the menu row and
+- Storage: “Scan provider storage” enables background scans of known provider-owned local paths (default off; upgraded
+  installs keep their previous opt-in). “Show storage in menu” (default off) adds the menu row and
   reads as off while scanning is off, without losing the saved choice. Cleanup ideas offer Move to Trash after a
   confirmation; CodexBar only trashes a scanned component when the root and target are still the same on-disk objects
   it scanned, never permanently deletes, and never touches paths outside the provider root.

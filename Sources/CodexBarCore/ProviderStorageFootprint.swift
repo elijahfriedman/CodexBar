@@ -396,6 +396,9 @@ public struct ProviderStorageScanner: @unchecked Sendable {
         var bytes: Int64 = 0
         var unreadablePaths: [String] = []
         var componentBytes: [String: Int64] = [:]
+        /// Identity of each top-level entry, captured when the enumerator first reaches it — before any of its
+        /// bytes are measured — and dropped if the entry no longer matches once measurement finishes.
+        var componentIdentities: [String: ProviderStorageFileIdentity] = [:]
     }
 
     private let fileManager: FileManager
@@ -415,6 +418,7 @@ public struct ProviderStorageScanner: @unchecked Sendable {
         var missingPaths: [String] = []
         var unreadablePaths: [String] = []
         var components: [ProviderStorageFootprint.Component] = []
+        var rootIdentities: [String: ProviderStorageFileIdentity] = [:]
 
         for path in candidatePaths {
             if Task.isCancelled { break }
@@ -429,33 +433,36 @@ public struct ProviderStorageScanner: @unchecked Sendable {
             if self.isSymbolicLink(at: url) {
                 continue
             }
+            // Bind the root's identity to the object actually measured: read it before measuring and keep it only
+            // if the same object is still there afterwards, so a root swapped mid-scan never gains cleanup authority.
+            let rootIdentityBeforeScan = self.identity(atPath: path)
             if isDirectory.boolValue {
                 let result = self.scanDirectory(at: url)
                 if Task.isCancelled { break }
                 totalBytes += result.bytes
                 unreadablePaths.append(contentsOf: result.unreadablePaths)
                 components.append(contentsOf: result.componentBytes.map {
-                    ProviderStorageFootprint.Component(path: $0.key, totalBytes: $0.value)
+                    ProviderStorageFootprint.Component(
+                        path: $0.key,
+                        totalBytes: $0.value,
+                        identity: result.componentIdentities[$0.key])
                 })
             } else {
                 let result = self.sizeOfFile(at: url)
                 totalBytes += result.bytes
                 unreadablePaths.append(contentsOf: result.unreadablePaths)
                 if result.bytes > 0 {
-                    components.append(.init(path: url.path, totalBytes: result.bytes))
+                    components.append(.init(
+                        path: url.path,
+                        totalBytes: result.bytes,
+                        identity: self.stableIdentity(
+                            atPath: url.path,
+                            capturedBeforeMeasuring: rootIdentityBeforeScan)))
                 }
             }
-        }
-
-        var rootIdentities: [String: ProviderStorageFileIdentity] = [:]
-        for path in existingPaths {
-            rootIdentities[path] = ProviderStorageFileIdentity.current(atPath: path, fileManager: self.fileManager)
-        }
-        components = components.map {
-            ProviderStorageFootprint.Component(
-                path: $0.path,
-                totalBytes: $0.totalBytes,
-                identity: ProviderStorageFileIdentity.current(atPath: $0.path, fileManager: self.fileManager))
+            if let identity = self.stableIdentity(atPath: path, capturedBeforeMeasuring: rootIdentityBeforeScan) {
+                rootIdentities[path] = identity
+            }
         }
 
         return ProviderStorageFootprint(
@@ -540,6 +547,14 @@ public struct ProviderStorageScanner: @unchecked Sendable {
                 }
                 continue
             }
+            // A top-level entry is reached before any of its descendants, so this captures the identity of the
+            // exact object whose bytes are about to be measured.
+            if enumerator.level == 1,
+               let componentPath = self.topLevelComponentPath(for: itemURL, rootPath: rootPath),
+               let identity = self.identity(atPath: componentPath)
+            {
+                result.componentIdentities[componentPath] = identity
+            }
             if itemValues.isRegularFile == true {
                 let bytes = Int64(itemValues.fileSize ?? 0)
                 result.bytes += bytes
@@ -548,8 +563,26 @@ public struct ProviderStorageScanner: @unchecked Sendable {
                 }
             }
         }
+        // Keep a component's identity only if the object measured is still the one at its path; anything replaced
+        // during the scan loses its identity, which makes cleanup refuse it until a fresh scan.
+        result.componentIdentities = result.componentIdentities.filter { path, identity in
+            self.identity(atPath: path) == identity
+        }
         result.unreadablePaths = unreadableCollector.paths
         return result
+    }
+
+    private func identity(atPath path: String) -> ProviderStorageFileIdentity? {
+        ProviderStorageFileIdentity.current(atPath: path, fileManager: self.fileManager)
+    }
+
+    /// The identity captured before measuring, if the same object is still at `path` after measuring.
+    private func stableIdentity(
+        atPath path: String,
+        capturedBeforeMeasuring before: ProviderStorageFileIdentity?) -> ProviderStorageFileIdentity?
+    {
+        guard let before, self.identity(atPath: path) == before else { return nil }
+        return before
     }
 
     private func topLevelComponentPath(for url: URL, rootPath: String) -> String? {

@@ -343,6 +343,7 @@ struct ProviderStorageFootprintTests {
             settings: settings,
             environmentBase: ["CODEX_HOME": codexHome.path])
         settings.providerStorageFootprintsEnabled = true
+        settings.providerStorageScanEnabled = true
         settings.backgroundWorkLowPowerModePreference = .on
         store.managedCodexAccountsForStorageOverride = []
 
@@ -384,6 +385,7 @@ struct ProviderStorageFootprintTests {
             settings: settings,
             environmentBase: ["CODEX_HOME": codexHome.path])
         settings.providerStorageFootprintsEnabled = true
+        settings.providerStorageScanEnabled = true
         store.managedCodexAccountsForStorageOverride = []
 
         await store.refreshStorageFootprintsNow(for: [.codex])
@@ -407,7 +409,7 @@ struct ProviderStorageFootprintTests {
 
     @Test
     @MainActor
-    func `storage scan is on by default, menu row is opt in, and scan off-on keeps the menu choice`() async throws {
+    func `storage scan is off by default, menu row is opt in, and scan off-on keeps the menu choice`() async throws {
         let home = try Self.makeTemporaryDirectory()
         defer { try? FileManager.default.removeItem(at: home) }
 
@@ -433,9 +435,10 @@ struct ProviderStorageFootprintTests {
             environmentBase: ["CODEX_HOME": codexHome.path])
         store.managedCodexAccountsForStorageOverride = []
 
-        // Scanning is on by default and feeds Settings; the menu row stays opt-in.
-        #expect(settings.providerStorageScanEnabled)
+        // Scanning is off by default; once enabled it feeds Settings while the menu row stays opt-in.
+        #expect(!settings.providerStorageScanEnabled)
         #expect(!settings.providerStorageFootprintsEnabled)
+        settings.providerStorageScanEnabled = true
         await store.refreshStorageFootprintsForOverviewNow()
         #expect(store.storageFootprint(for: .codex)?.totalBytes == 16)
         #expect(store.menuStorageFootprint(for: .codex) == nil)
@@ -481,6 +484,7 @@ struct ProviderStorageFootprintTests {
             settings: settings,
             environmentBase: ["CODEX_HOME": codexHome.path])
         settings.providerStorageFootprintsEnabled = true
+        settings.providerStorageScanEnabled = true
         store.storageRefreshGeneration = 41
         store.storageRefreshInFlightSignature = "codex=\(codexHome.path)"
         store.storageRefreshTask = Task.detached {
@@ -529,6 +533,7 @@ struct ProviderStorageFootprintTests {
             settings: settings,
             environmentBase: ["CODEX_HOME": ambientHome.path])
         settings.providerStorageFootprintsEnabled = true
+        settings.providerStorageScanEnabled = true
         store.managedCodexAccountsForStorageOverride = [
             Self.managedCodexAccount(homePath: firstManagedHome.path),
         ]
