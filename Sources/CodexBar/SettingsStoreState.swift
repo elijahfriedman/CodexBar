@@ -78,6 +78,7 @@ struct SettingsDefaultsState {
     var openAIWebAccessEnabled: Bool
     var openAIWebBatterySaverEnabled: Bool
     var backgroundWorkLowPowerModePreference: LowPowerModePreference
+    var providerStorageScanEnabled: Bool
     var providerStorageFootprintsEnabled: Bool
     var jetbrainsIDEBasePath: String
     var mergeIcons: Bool
