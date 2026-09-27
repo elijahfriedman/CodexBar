@@ -806,101 +806,45 @@ struct InlineUsageDashboardContent: View {
     private struct MiniUsageBars: View {
         let model: InlineUsageDashboardModel
         @Environment(\.menuItemHighlighted) private var isHighlighted
-        @Environment(\.layoutDirection) private var layoutDirection
-        @State private var selectedPointID: String?
 
         var body: some View {
             let scale = UsageChartScale(values: self.model.points.compactMap(\.value))
-            let hoverDetail = self.model.points
-                .first(where: { $0.id == self.selectedPointID })?
-                .hoverDetail
             VStack(alignment: .trailing, spacing: 2) {
                 if let currencyCode = self.model.currencyCode {
-                    let scaleLabel = scale.maximum > 0
+                    Text(scale.maximum > 0
                         ? UsageFormatter.compactCurrencyString(scale.maximum, currencyCode: currencyCode)
-                        : " "
-                    Text(hoverDetail?.summary ?? scaleLabel)
+                        : " ")
                         .font(.caption2)
                         .foregroundStyle(MenuHighlightStyle.secondary(self.isHighlighted))
                         .monospacedDigit()
                         .lineLimit(1)
                         .minimumScaleFactor(0.72)
                         .allowsTightening(true)
-                        .frame(maxWidth: .infinity, alignment: hoverDetail == nil ? .trailing : .leading)
-                        .opacity(hoverDetail != nil || scale.maximum > 0 ? 1 : 0)
-                        .accessibilityHidden(hoverDetail != nil)
+                        .frame(maxWidth: .infinity, alignment: .trailing)
+                        .opacity(scale.maximum > 0 ? 1 : 0)
                 }
                 GeometryReader { geometry in
                     let layout = InlineUsageBarLayout(width: geometry.size.width, count: self.model.points.count)
-                    ZStack {
-                        HStack(alignment: .bottom, spacing: layout.spacing) {
-                            ForEach(self.model.points) { point in
-                                let barHeight = self.height(
+                    HStack(alignment: .bottom, spacing: layout.spacing) {
+                        ForEach(self.model.points) { point in
+                            RoundedRectangle(cornerRadius: 1.5, style: .continuous)
+                                .fill(self.fill(for: point, scale: scale))
+                                .frame(width: layout.barWidth)
+                                .frame(height: self.height(
                                     for: point,
                                     scale: scale,
-                                    available: geometry.size.height)
-                                RoundedRectangle(cornerRadius: 1.5, style: .continuous)
-                                    .fill(self.fill(for: point, scale: scale))
-                                    .frame(width: layout.barWidth)
-                                    .frame(height: barHeight)
-                                    .overlay {
-                                        if point.id == self.selectedPointID {
-                                            RoundedRectangle(cornerRadius: 1.5, style: .continuous)
-                                                .strokeBorder(
-                                                    MenuHighlightStyle.primary(self.isHighlighted),
-                                                    lineWidth: layout.selectionStrokeWidth(barHeight: barHeight))
-                                        }
-                                    }
-                                    .accessibilityLabel(point.accessibilityValue)
-                            }
-                        }
-                        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
-                        .overlay(alignment: .bottomLeading) {
-                            Rectangle()
-                                .fill(MenuHighlightStyle.secondary(self.isHighlighted).opacity(0.22))
-                                .frame(height: 1)
-                        }
-
-                        if self.model.points.contains(where: { $0.hoverDetail != nil }) {
-                            MouseLocationReader { location in
-                                self.updateSelection(location: location, layout: layout)
-                            }
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            .contentShape(Rectangle())
+                                    available: geometry.size.height))
+                                .accessibilityLabel(point.accessibilityValue)
                         }
                     }
-                    .onChange(of: geometry.size.width) { _, _ in
-                        self.clearSelection()
-                    }
-                    .onChange(of: self.model.points) { previousPoints, points in
-                        let nextPointID = InlineUsageBarHoverSelection.reconciledPointID(
-                            current: self.selectedPointID,
-                            previousPoints: previousPoints,
-                            points: points)
-                        guard self.selectedPointID != nextPointID else { return }
-                        self.selectedPointID = nextPointID
-                    }
-                    .onChange(of: self.layoutDirection) { _, _ in
-                        self.clearSelection()
+                    .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .bottom)
+                    .overlay(alignment: .bottomLeading) {
+                        Rectangle()
+                            .fill(MenuHighlightStyle.secondary(self.isHighlighted).opacity(0.22))
+                            .frame(height: 1)
                     }
                 }
             }
-        }
-
-        private func updateSelection(location: CGPoint?, layout: InlineUsageBarLayout) {
-            let nextPointID = InlineUsageBarHoverSelection.pointID(
-                current: self.selectedPointID,
-                locationX: location?.x,
-                layout: layout,
-                layoutDirection: self.layoutDirection,
-                points: self.model.points)
-            guard self.selectedPointID != nextPointID else { return }
-            self.selectedPointID = nextPointID
-        }
-
-        private func clearSelection() {
-            guard self.selectedPointID != nil else { return }
-            self.selectedPointID = nil
         }
 
         private func height(
@@ -942,69 +886,13 @@ struct InlineUsageDashboardContent: View {
 struct InlineUsageBarLayout {
     let spacing: CGFloat
     let barWidth: CGFloat
-    private let width: CGFloat
-    private let barCount: Int
 
     init(width: CGFloat, count: Int) {
-        self.width = max(0, width)
-        self.barCount = max(0, count)
-        let layoutCount = max(1, self.barCount)
-        self.spacing = self.barCount <= 1 ? 0 : min(2, self.width / CGFloat(layoutCount) / 4)
-        self.barWidth = self.barCount == 0
+        let width = max(0, width)
+        let barCount = max(0, count)
+        self.spacing = barCount <= 1 ? 0 : min(2, width / CGFloat(barCount) / 4)
+        self.barWidth = barCount == 0
             ? 0
-            : max(0, (self.width - self.spacing * CGFloat(self.barCount - 1)) / CGFloat(self.barCount))
-    }
-
-    func selectionStrokeWidth(barHeight: CGFloat) -> CGFloat {
-        min(1, self.barWidth / 2, max(0, barHeight) / 2)
-    }
-
-    func contains(_ locationX: CGFloat) -> Bool {
-        self.barCount > 0 && self.width > 0 && locationX >= 0 && locationX <= self.width
-    }
-
-    func index(atX locationX: CGFloat, layoutDirection: LayoutDirection = .leftToRight) -> Int? {
-        guard self.contains(locationX), self.barWidth > 0 else { return nil }
-
-        let stride = self.barWidth + self.spacing
-        guard stride > 0 else { return nil }
-        let resolvedX = layoutDirection == .rightToLeft ? self.width - locationX : locationX
-        if self.spacing < 1 {
-            let nearest = Int(((resolvedX - self.barWidth / 2) / stride).rounded())
-            return min(max(nearest, 0), self.barCount - 1)
-        }
-        let index = min(Int(resolvedX / stride), self.barCount - 1)
-        let offset = resolvedX - CGFloat(index) * stride
-        let tolerance = max(1, self.width) * CGFloat.ulpOfOne * 8
-        return offset <= self.barWidth + tolerance ? index : nil
-    }
-}
-
-enum InlineUsageBarHoverSelection {
-    static func reconciledPointID(
-        current: String?,
-        previousPoints: [InlineUsageDashboardModel.Point],
-        points: [InlineUsageDashboardModel.Point]) -> String?
-    {
-        guard previousPoints.map(\.id) == points.map(\.id), let current else { return nil }
-        return points.contains { $0.id == current && $0.hoverDetail != nil } ? current : nil
-    }
-
-    static func pointID(
-        current: String?,
-        locationX: CGFloat?,
-        layout: InlineUsageBarLayout,
-        layoutDirection: LayoutDirection,
-        points: [InlineUsageDashboardModel.Point]) -> String?
-    {
-        guard let locationX else { return nil }
-        guard layout.contains(locationX) else { return nil }
-        guard let index = layout.index(atX: locationX, layoutDirection: layoutDirection) else {
-            return current.flatMap { currentID in
-                points.contains { $0.id == currentID && $0.hoverDetail != nil } ? currentID : nil
-            }
-        }
-        guard points.indices.contains(index), points[index].hoverDetail != nil else { return nil }
-        return points[index].id
+            : max(0, (width - self.spacing * CGFloat(barCount - 1)) / CGFloat(barCount))
     }
 }
