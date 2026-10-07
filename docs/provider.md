@@ -45,6 +45,9 @@ origin-filtered IndexedDB. For intentionally Chrome-only cookie imports, use
 `BrowserCookieImportSupport.chromeOnly(reason:)` with the provider's reason for avoiding unrelated browser prompts.
 Copilot budgets, Grok, Helmcode, Notion, Qoder, Replicate, TypeSafe, Venice, and ZoomMate retain this restricted
 default. A shared catalog is not permission to widen a provider's documented browser or credential scope.
+Muse (muse.ai) uses the catalog's default browser order, including Aside, Opera, and Opera Neon with SweetCookieKit 0.5.5.
+Plugin cookie settings display the provider's catalog-derived supported-browser names and a Manual fallback. Use the
+same `ctx.browser.supportedBrowsers` names in plugin sign-in guidance; never maintain a second browser-name list.
 
 Provider behavior is descriptor-driven. Two flat first-party manifests form the closed bootstrap boundary:
 `ProviderManifest` lists core descriptors and `ProviderImplementationManifest` lists app implementations. The registries
@@ -102,6 +105,10 @@ Introduce a single descriptor per provider:
 UI and settings should become descriptor-driven:
 - no provider-specific branching for labels/links/toggle titles
 - minimal provider-specific UI (only when a provider truly needs bespoke UX)
+
+For detail-backed balances, set `presentation.menuBarBalanceDetailLabels` to the provider's ordered row labels.
+The shared menu bar resolver uses the first reported row for Balance elements and, when no quota window exists,
+automatic text. Keep real percentage windows intact; do not fabricate a quota for a credits-only account.
 
 ## Fetch strategies
 
@@ -261,6 +268,10 @@ implementation, icon, settings-section, or widget registrations by provider ID. 
 remain deliberate literal exceptions because AppIntents requires statically extractable declarations.
 
 ## UI notes (Providers settings)
+Providers with opt-in filesystem roots return `ProviderSettingsDirectoryListDescriptor` values from
+`settingsDirectoryLists(context:)`. The shared row owns the directory picker and add/remove controls;
+providers retain responsibility for path interpretation and scan scope.
+
 Current: checkboxes per provider.
 
 Preferred direction: table/list rows (like a “sessions” table):

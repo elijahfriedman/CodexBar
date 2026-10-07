@@ -8,7 +8,7 @@ read_when:
 
 # Providers
 
-CodexBar currently registers 87 provider IDs. Some companies expose multiple surfaces, such as Codex vs OpenAI API or
+CodexBar currently registers 91 provider IDs. Some companies expose multiple surfaces, such as Codex vs OpenAI API or
 OpenCode vs OpenCode Go, because the auth source and quota shape differ.
 
 ## Fetch strategies (current)
@@ -22,6 +22,9 @@ New installs use `~/.config/codexbar/config.json`; existing `~/.codexbar/config.
 See [CLI configuration](cli-configuration.md) for `XDG_CONFIG_HOME` and `CODEXBAR_CONFIG` overrides.
 
 ## Usage & Spend settings
+
+The Statistics time zone picker changes the saved reporting zone. Use Mac's current time zone pins the Mac's
+current zone once; later system timezone changes do not override the saved selection.
 
 Settings → Usage & Spend is a local estimated-cost history page, not a billing receipt and not the menu-bar quota
 card. Range choices are 7 / 30 / 90 days and All (the scan window is 365 days). Amounts are list-price equivalents
@@ -45,6 +48,9 @@ sessions, Codex projects, and a 365-day token heatmap. A heatmap day with no cov
 and is not clickable. Custom list-price overlays are documented in `docs/model-pricing.md`.
 Cached and combined reports retain token-class details and known request counts. Coverage is combined from each
 source's existing classification, so a priced source cannot hide another source's unpriced or unmetered rows.
+The daily ledger retains known request counts when another source cannot count requests and marks that subtotal
+with `≥`. If every source omits its request count, the ledger shows a dash. Request-count gaps do not make known
+token or cost totals partial, and partial cost estimates do not erase known request counts.
 If coverage totals cannot fit, aggregation falls back to existing request or daily-row inference without changing costs or stored data.
 Token sums that exceed the supported integer range remain unavailable for that aggregation pass; later rows do not
 restore a partial count. Other token classes, pricing, and explicit totals retain their existing meaning. Materialized
@@ -98,6 +104,7 @@ complete when the available scan window covers fewer days.
 | ElevenLabs | API key from config/env → subscription usage API (`api`). |
 | [Nous Portal](nous.md) | Read-only Hermes login or explicit access token → bundled plugin for monthly credits and top-up balances (`api`). |
 | [Muse Code](muse.md) | Existing CLI device-code login → bundled plugin for reported five-hour and weekly subscription quotas (`oauth`); opt-in `dev.meta.ai` browser-team quota for a user-selected team when the login response omits them (`oauth+web`). |
+| [Muse (muse.ai)](museai.md) | Browser cookies for `muse.ai` or a manual Cookie header → bundled plugin for the muse.ai weekly Free/Power/Maximum allowance (`web`). |
 | [CodeRabbit](coderabbit.md) | One bounded local CLI usage report for review counts and billing state (`cli`); no quota or balance is inferred. |
 | [Replicate](replicate.md) | Native Chrome cookie candidates or a manual header → bundled plugin for monthly spend and optional prepaid credits (`web`). |
 | [TypeSafe](typesafe.md) | Chrome cookies or a manual header → bundled plugin for billing spend and credit balance (`web`). |
@@ -127,7 +134,7 @@ complete when the available scan window covers fewer days.
 | Codebuff | API token from config/env or `codebuff login` credentials → usage API (`api`). |
 | Venice | Auto/API: API key from config/env → DIEM/USD balance (`api`). Explicit Web: Chrome or manual cookies → subscription credit details (`web`). |
 | Command Code | Web billing API via Command Code session cookies (`web`). |
-| ClinePass | API key from config/env, then the existing `cline auth` session file → 5-hour, weekly, and monthly subscription usage limits (`api`). |
+| ClinePass | API key from config/env or labeled API-key accounts, then the existing `cline auth` session file → 5-hour, weekly, and monthly subscription usage limits (`api`). |
 | Qoder | Browser or manual cookies → big model credit usage (`web`). |
 | StepFun | Username/password login or manual Oasis token (`web`). |
 | AWS Bedrock | AWS credentials → Cost Explorer spend/budgets and optional CloudWatch Claude activity (`api`). |
@@ -153,6 +160,15 @@ complete when the available scan window covers fewer days.
 | Notion AI | Browser cookies → workspace resolution and the AI usage allowance API (`web`). |
 | [IBM Bob](ibm-bob.md) | API key from config/env → profile and per-team Bobcoin budget APIs (`api`). |
 | [Pi](pi.md) | Local Pi/OMP assistant transcripts → token history and API-rate cost estimates (`local`); no subscription quota. |
+<!-- Generated provider additions: Scripts/regenerate-provider-docs.mjs -->
+
+| Provider | Source |
+|---|---|
+| [Langdock](langdock.md) | Selected Microsoft Edge profile → personal included session and weekly limits (`web`, macOS). |
+| [LithosAI](lithosai.md) | Chrome or manual console cookies for prepaid USD balance and optional UTC spend. |
+| [WorkBuddy](workbuddy.md) | Chrome or manual www.workbuddy.cn cookies for the monthly credits allowance, plan name, and cycle reset. |
+
+<!-- End generated provider additions -->
 
 ## Codex
 - App Auto: OAuth API first; falls back to CLI only when OAuth credentials are missing or auth/refresh is invalid.
@@ -556,7 +572,7 @@ refresh the token; renew an expired session with `cline auth`. See the path over
 
 ClinePass usage is fetched by the bundled TypeScript plugin on macOS and Linux; QuickJS is the default engine and
 JavaScriptCore is the macOS rollback engine. The committed `.js` is generated from `clinepass.ts`.
-- API key from `~/.codexbar/config.json`, `CLINE_API_KEY`, or `CLINEPASS_API_KEY`.
+- Selected labeled API-key account, otherwise an API key from `~/.codexbar/config.json`, `CLINE_API_KEY`, or `CLINEPASS_API_KEY`; a rejected selected key never falls back to another credential.
 - Reads 5-hour, weekly, and monthly usage limits from `GET https://api.cline.bot/api/v1/users/me/plan/usage-limits`.
 - ClinePass subscription limits are distinct from Cline pay-as-you-go balance and usage.
 - Status: none yet.

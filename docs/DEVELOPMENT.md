@@ -524,6 +524,19 @@ factory tests; exclude those when running a nonpersistent-only focused check.
 
 ### CI Aggregate Contract
 
+`make check` and portable CI lint run `node Scripts/check-package-resolved.mjs` and its synthetic regression tests
+(`node --test Scripts/test_package_resolved.mjs`). This offline, read-only check compares every package identity,
+revision, and version in the root and widget workspace `Package.resolved` files, including missing or extra pins.
+Pin order and workspace-specific `originHash` values do not affect the comparison. After changing dependencies,
+resolve the widget workspace from the repository root and commit both resolved files together:
+
+```bash
+xcodebuild -resolvePackageDependencies -project WidgetExtension/CodexBarWidgetExtension.xcodeproj
+```
+
+The check names each drifted package and prints this repair command before packaging can fail with an out-of-date
+resolved file when automatic resolution is disabled.
+
 The `lint-build-test` check in `.github/workflows/ci.yml` keeps its existing name and requires successful lint,
 change detection, and the full `build-linux-cli` glibc matrix (x86_64 and ARM64 build, tests, and smoke checks).
 Glibc Linux has no path or draft skip: failure, cancellation, skipped, empty, missing, or unknown matrix results
@@ -641,3 +654,58 @@ defaults delete com.steipete.codexbar debugMainThreadHangWatchdog
 - Parallel provider fetches
 - First failure can be suppressed when prior data exists
 - WidgetKit snapshot for macOS widgets
+
+### macOS direct test groups
+
+`make test` remains serial by default. Invoke
+`./Scripts/test.sh --direct-workers 4` to request up to eight isolated group workers locally.
+SwiftPM still builds and discovers the complete inventory. Before launch, the adapter enumerates
+both XCTest and Swift Testing using the selected Xcode toolchain helpers and requires an exact
+inventory match, including duplicate detection. An inventory mismatch fails the run before any
+group executes. Local runs with missing helpers, unsupported toolchains, or Linux retain the serial
+SwiftPM path with a diagnostic. On CI, requesting direct workers requires a verified direct runtime:
+capability failures also fail the job instead of falling back to serial execution.
+
+Hosted macOS CI explicitly uses two serial SwiftPM shards, retaining the 75-minute test step and
+90-minute job limits. This avoids a third cold build while direct execution on Xcode 26.6 remains
+unverified after a helper SIGTRAP. A five-minute, nonblocking direct smoke test runs one group on
+shard zero after the complete serial shard passes; it is diagnostic evidence, not coverage or
+throughput proof. Both modes print ordered selection groups and timing summaries.
+
+The adapter includes both public and private platform framework search paths and disables Swift
+Testing during XCTest discovery, matching SwiftPM's launcher. Probe failures print the helper,
+exit status or signal, and redacted stdout/stderr. On CI, signal failures also wait up to five
+seconds for fresh helper crash reports in the original and temporary homes. The workflow collects
+fresh test crash reports again after failures, including nonblocking smoke failures. Credential
+values and local home identities are redacted; unrelated process reports are excluded.
+
+Each group has a fresh process and temporary `HOME` and `CFFIXED_USER_HOME`, with the existing credential
+and session-file isolation, Keychain suppression, timeout, retry, and descendant cleanup.
+Test output is buffered per group. A direct runtime failure after execution begins fails the run;
+it does not silently rerun the suite through a different runtime. This opt-in adapter depends on
+SwiftPM's toolchain helper contract and needs compatibility validation when updating Xcode.
+
+`--swift-command /path/to/swift-wrapper` works when the wrapper forwards `-print-target-info`
+unchanged to the selected Xcode Swift compiler and supports `build --show-bin-path`. The runner
+queries the wrapper's products directory; a different compiler/target or command prefix arguments
+are rejected (local serial fallback, CI failure). For a host requiring the native build backend,
+use the same wrapper for serial and direct comparisons:
+
+```bash
+#!/bin/bash
+set -euo pipefail
+case "${1:-}" in
+  test|build)
+    subcommand="$1"
+    shift
+    exec /usr/bin/xcrun swift "$subcommand" --build-system native --jobs 4 -Xswiftc -gnone "$@"
+    ;;
+  *) exec /usr/bin/xcrun swift "$@" ;;
+esac
+```
+
+Save it as an executable file, then invoke
+`./Scripts/test.sh --swift-command /path/to/swift-wrapper --direct-workers 4`.
+Wrappers may add build options; test-selection or runtime-environment changes inside a wrapper
+cannot be reproduced by direct launch and are unsupported. Live/opt-in tests remain disabled by
+their existing test conditions; this flag does not enable them.

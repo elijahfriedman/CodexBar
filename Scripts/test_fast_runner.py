@@ -164,6 +164,7 @@ class NativeTestRunnerTests(unittest.TestCase):
                                 CODEXBAR_USE_LOCAL_SWEETCOOKIEKIT="1")
         commands = [
             ["bash", "Scripts/test.sh"], ["bash", "Scripts/test_fast.sh"],
+            ["bash", "Scripts/test.sh", "--direct-workers", "4"],
             ["bash", "Scripts/test-plugin-engines.sh"],
             *[["make", "-s", target] for target in
               ["test", "test-fast", "test-skip-build", "test-tty", "test-live"]],
@@ -171,7 +172,11 @@ class NativeTestRunnerTests(unittest.TestCase):
         for command in commands:
             with self.subTest(command=command):
                 result = self.run_command(command)
-                self.assertEqual(result.returncode, 0, result.stderr)
+                # The synthetic compiler cannot supply a direct runtime; CI must fail closed.
+                expected_code = 2 if "--direct-workers" in command else 0
+                self.assertEqual(result.returncode, expected_code, result.stderr)
+                if expected_code:
+                    self.assertIn("Direct mode refused on CI:", result.stderr)
                 self.assertEqual(json.loads(self.capture.read_text()), {
                     "secrets_absent": True, "ci_preserved": True, "flag_preserved": True,
                     "local_dependency_preserved": True,
@@ -190,9 +195,20 @@ class TestGroupTests(unittest.TestCase):
                 for group in groups:
                     if any(item.suite_name in ISOLATED_SUITES for item in group):
                         self.assertEqual(len(group), 1)
-                sharded = [item for shard in range(2)
-                           for group in shard_groups(groups, shard, 2) for item in group]
-                self.assertCountEqual(sharded, selections)
+                for count in [2, 3]:
+                    sharded = [item for shard in range(count)
+                               for group in shard_groups(groups, shard, count) for item in group]
+                    self.assertCountEqual(sharded, selections)
+
+    def test_shards_balance_groups_and_preserve_each_selection_once(self):
+        for shard_count in [2, 3]:
+            for group_count in [0, 1, 2, 3, 4, 140, 201, 202]:
+                with self.subTest(shard_count=shard_count, group_count=group_count):
+                    groups = [[TestSelection(f"Fixture{i}", f"^Fixture{i}/")] for i in range(group_count)]
+                    shards = [shard_groups(groups, index, shard_count) for index in range(shard_count)]
+                    counts = [len(shard) for shard in shards]
+                    self.assertLessEqual(max(counts) - min(counts), 1)
+                    self.assertCountEqual([group for shard in shards for group in shard], groups)
 
 
 if __name__ == "__main__":

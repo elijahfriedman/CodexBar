@@ -16,7 +16,6 @@ public enum ClinePassProviderDescriptor {
         dashboardURL: "https://app.cline.bot/dashboard/subscription?personal=true",
         color: ProviderColor(hex: 0x5487C8),
         confetti: [0x5487C8, 0x111111, 0xFFFFFF],
-        widgetColor: ProviderColor(hex: 0x61A3FA),
         noDataMessage: "ClinePass cost history is not available via the usage-limits API.",
         environmentKey: "CLINE_API_KEY",
         environmentAliases: ["CLINEPASS_API_KEY"],
@@ -27,7 +26,8 @@ public enum ClinePassProviderDescriptor {
             subtitle: "Paste an API key, or run cline auth. Reads the existing Cline session without copying it.",
             placeholder: "ClinePass API key..."),
         showsAPIDetail: true,
-        availability: .configuredKey)
+        availability: .configuredKeyOrAccount,
+        observesTokenAccounts: true)
 
     private static let credentials = ProviderCredentialAdapter(
         supportsAPIKeyOverride: true,
@@ -42,6 +42,15 @@ public enum ClinePassProviderDescriptor {
                 environment: environment, authFileURL: authFileURL) else { return nil }
             return ProviderTokenResolution(token: credential.token, source: .authFile)
         },
+        tokenAccountSupport: TokenAccountSupport(
+            title: "API keys",
+            subtitle: "Store multiple ClinePass API keys. The selected key overrides the configured API key "
+                + "and the cline auth session.",
+            placeholder: "ClinePass API key...",
+            injection: .environment(key: Self.spec.environmentKey),
+            requiresManualCookieSource: false,
+            cookieName: nil,
+            environmentKeysToScrub: Self.spec.environmentAliases),
         authDetector: { environment, _ in
             if Self.spec.apiKey(environment: environment) != nil { return ["api"] }
             guard let credential = ClinePassSettingsReader.fileCredential(environment: environment) else { return [] }

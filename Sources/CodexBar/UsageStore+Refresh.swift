@@ -651,7 +651,7 @@ extension UsageStore {
         } else {
             scoped
         }
-        let backfilled = await MainActor.run { () -> UsageSnapshot? in
+        let publication = await MainActor.run { () -> (snapshot: UsageSnapshot, sessionRestored: Bool)? in
             guard self.isCurrentProviderRefreshGeneration(provider, generation: context.generation) else {
                 return nil
             }
@@ -676,7 +676,7 @@ extension UsageStore {
             let allowanceCurrent = self.resolvingCurrentCopilotAllowance(in: accountScoped, provider: provider)
             let backfilled = self.preparePublishedSnapshot(
                 allowanceCurrent, provider: provider, resetBackfillSource: resetBackfillSource, context: context)
-            let warningAccount = self.handleProviderRefreshNotifications(
+            let notifications = self.handleProviderRefreshNotifications(
                 provider: provider, result: result, snapshot: backfilled, context: context)
             self.lastKnownResetSnapshots[provider.instanceID] = backfilled
             self.snapshots[provider.instanceID] = backfilled
@@ -718,10 +718,11 @@ extension UsageStore {
                 backfilled: backfilled,
                 result: result,
                 context: context)
-            self.emitUsageUpdatedHook(provider: provider, snapshot: backfilled, rateKey: warningAccount)
-            return backfilled
+            self.emitUsageUpdatedHook(provider: provider, snapshot: backfilled, rateKey: notifications.account)
+            return (backfilled, notifications.sessionRestored)
         }
-        guard let backfilled else { return }
+        guard let publication else { return }
+        let backfilled = publication.snapshot
         self.refreshClaudeVersionAfterUserInitiatedCLIFetch(provider: provider, strategyKind: result.strategyKind)
         let isClaudeOAuthSample = provider == .claude && result.strategyKind == .oauth
         let claudeOAuthPersistentRefHash: String? = if isClaudeOAuthSample,
@@ -749,7 +750,8 @@ extension UsageStore {
                         && claudeOAuthPersistentRefHash == nil)),
             claudeOAuthActiveAccountObservation: context.claudeOAuthActiveAccountObservation,
             isClaudeOAuthSample: isClaudeOAuthSample,
-            codexLimitResetOwnerKey: context.codexLimitResetOwnerKey)
+            codexLimitResetOwnerKey: context.codexLimitResetOwnerKey,
+            sessionRestoredNotificationPending: publication.sessionRestored)
         guard self.isCurrentProviderRefreshGeneration(provider, generation: context.generation) else { return }
         if let runtime = self.providerRuntimes[provider.instanceID] {
             let runtimeContext = ProviderRuntimeContext(
@@ -832,7 +834,7 @@ extension UsageStore {
             for: provider,
             owner: context.codexExpectedGuard,
             includesCredits: context.includesCredits)
-            .backfillingResetTimes(from: resetBackfillSource)
+            .backfillingResetTimesForProvider(provider, from: resetBackfillSource)
     }
 
     private func preservingDeepSeekProfileCatalog(
@@ -898,7 +900,8 @@ extension UsageStore {
               currentOwnerKey == expectedOwnerKey
         else { return }
 
-        let visibleAccounts = self.freshCodexVisibleAccountsForSnapshotHydration()
+        let projection = self.freshCodexVisibleAccountProjectionForAccountRefresh()
+        let visibleAccounts = projection.visibleAccounts
         let activeMatches = visibleAccounts.filter {
             $0.isActive &&
                 $0.selectionSource == currentGuard.source &&
@@ -914,18 +917,15 @@ extension UsageStore {
                   visibleAccounts: visibleAccounts) == currentOwnerKey
         else { return }
 
-        let identity = snapshot.identity(for: .codex)
-        let relabeled = snapshot.withIdentity(ProviderIdentitySnapshot(
-            providerID: .codex,
-            accountEmail: account.email,
-            accountOrganization: identity?.accountOrganization,
-            loginMethod: identity?.loginMethod ?? account.workspaceLabel))
-        let currentSnapshots = [CodexAccountUsageSnapshot(
+        var currentSnapshots = Self.codexAccountSnapshots(
+            self.codexAccountSnapshots,
+            reconciledWith: projection).filter { $0.id != account.id }
+        currentSnapshots.append(CodexAccountUsageSnapshot(
             account: account,
-            snapshot: relabeled,
+            snapshot: Self.codexVisibleAccountSnapshotRelabeledForCurrentProjection(snapshot, account: account),
             error: nil,
             sourceLabel: sourceLabel,
-            credits: self.credits)]
+            credits: self.credits))
         self.codexAccountSnapshots = currentSnapshots
         self.codexAccountUsageSnapshotStore?.store(currentSnapshots)
     }
@@ -1412,9 +1412,9 @@ extension UsageStore {
                     (context.claudeUsesConsumerAutoPipeline ||
                         Self.isClaudeCLIRateLimitFailure(error) ||
                         isTerminalClaudeCLIParseFailure))
-            let shouldSurface = restoredClaudeHistory ||
-                self.failureGates[provider.instanceID]?
-                .shouldSurfaceError(onFailureWithPriorData: hadPriorData) ?? true
+            let shouldSurface = self.shouldSurfaceProviderRefreshFailure(
+                provider: provider,
+                state: (hadPriorData, preservesPriorData, restoredClaudeHistory))
             let preservesClaudeWebSessionFailure =
                 provider == .claude &&
                 hadPriorData &&

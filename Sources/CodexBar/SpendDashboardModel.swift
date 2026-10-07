@@ -130,7 +130,7 @@ struct SpendDashboardModel: Equatable, Sendable {
     /// A project roll-up scoped to the requested window. Projects are keyed per source so
     /// the same repository used under two Codex accounts stays attributed to each subscription.
     struct ProjectRow: Identifiable, Equatable, Sendable {
-        let rank: Int
+        var rank: Int
         let provider: UsageProvider
         let providerName: String
         let sourceID: String
@@ -138,9 +138,10 @@ struct SpendDashboardModel: Equatable, Sendable {
         let path: String?
         let totalTokens: Int?
         let totalCost: Double?
+        var isProjectless: Bool = false
 
         var id: String {
-            "\(self.sourceID):\(self.projectName)"
+            "\(self.sourceID):\(self.path.map { "path:\($0)" } ?? "name:\(self.projectName)")"
         }
     }
 
@@ -199,6 +200,13 @@ struct SpendDashboardModel: Equatable, Sendable {
 
         var hasPartialCounts: Bool {
             self.incompleteRequestCount > 0 || self.providers.contains(where: \.countsAreLowerBound)
+        }
+
+        /// True when some sources reported a request count and at least one could not.
+        /// Missing request counts stay on this flag so token totals are not marked as floors.
+        var requestsAreLowerBound: Bool {
+            let counts = self.providers.map(\.requestCount)
+            return counts.contains { $0 != nil } && counts.contains { $0 == nil }
         }
 
         var id: Date {
@@ -783,13 +791,15 @@ struct SpendDashboardModel: Equatable, Sendable {
     {
         struct Key: Hashable {
             let sourceID: String
-            let name: String
+            let identity: String
         }
 
         struct Accumulator {
+            var name: String
             let provider: UsageProvider
             let providerName: String
             let path: String?
+            var isProjectless: Bool
             var tokens: Int?
             var cost: Double?
             var sawTokens = false
@@ -806,13 +816,20 @@ struct SpendDashboardModel: Equatable, Sendable {
             for project in input.snapshot.projects {
                 let name = project.name.trimmingCharacters(in: .whitespacesAndNewlines)
                 guard !name.isEmpty else { continue }
-                let key = Key(sourceID: input.id, name: name)
+                let key = Key(sourceID: input.id, identity: project.path.map { "path:\($0)" } ?? "name:\(name)")
                 var aggregate = aggregates[key] ?? Accumulator(
+                    name: name,
                     provider: input.provider,
                     providerName: input.modelProviderName,
                     path: project.path,
+                    isProjectless: project.isProjectless,
                     tokens: 0,
                     cost: 0)
+                // An identical ledger path is an independent chat only when every record agrees.
+                if aggregate.isProjectless, !project.isProjectless {
+                    aggregate.name = name
+                }
+                aggregate.isProjectless = aggregate.isProjectless && project.isProjectless
                 for entry in project.daily {
                     guard let day = Self.day(entry.date, provider: input.provider, displayCalendar: calendar),
                           bounds.contains(day),
@@ -848,14 +865,15 @@ struct SpendDashboardModel: Equatable, Sendable {
                     provider: value.provider,
                     providerName: value.providerName,
                     sourceID: key.sourceID,
-                    projectName: key.name,
+                    projectName: value.name,
                     path: value.path,
                     totalTokens: value.sawTokens && !value.invalidTokens && !value.overflowedTokens
                         ? value.tokens
                         : nil,
                     totalCost: value.sawCost && !value.invalidCost && !value.overflowedCost
                         ? value.cost
-                        : nil)
+                        : nil,
+                    isProjectless: value.isProjectless)
             }
             .filter { row in
                 // A project the window never touched has no attributable spend; the scanner only
@@ -871,7 +889,10 @@ struct SpendDashboardModel: Equatable, Sendable {
                     if lhs.providerName != rhs.providerName {
                         return lhs.providerName < rhs.providerName
                     }
-                    return lhs.projectName < rhs.projectName
+                    if lhs.projectName != rhs.projectName {
+                        return lhs.projectName < rhs.projectName
+                    }
+                    return lhs.id < rhs.id
                 }
             }
             .enumerated()
@@ -884,7 +905,8 @@ struct SpendDashboardModel: Equatable, Sendable {
                     projectName: row.projectName,
                     path: row.path,
                     totalTokens: row.totalTokens,
-                    totalCost: row.totalCost)
+                    totalCost: row.totalCost,
+                    isProjectless: row.isProjectless)
             }
     }
 
@@ -1029,11 +1051,13 @@ struct SpendDashboardModel: Equatable, Sendable {
                 }
                 return lhs.offset < rhs.offset
             }.map(\.element)
+            // Request totals keep every known count. A source that cannot count requests marks the
+            // day as a lower bound instead of erasing the counts from the other sources.
             result.append(DailySummary(
                 day: day,
                 providers: sortedRows,
                 totalTokens: Self.completeIntSum(providerRows.map(\.totalTokens)),
-                requestCount: Self.completeIntSum(providerRows.map(\.requestCount)),
+                requestCount: Self.knownIntSum(providerRows.map(\.requestCount)),
                 totalCost: totalCost))
             guard let nextDay = calendar.date(byAdding: .day, value: 1, to: day) else { return [] }
             day = calendar.startOfDay(for: nextDay)
@@ -1324,7 +1348,7 @@ struct SpendDashboardModel: Equatable, Sendable {
         self.dayCount(in: self.commonCoverageInterval(summaries: summaries), calendar: calendar)
     }
 
-    private static func dayCount(in interval: ClosedRange<Date>?, calendar: Calendar) -> Int {
+    static func dayCount(in interval: ClosedRange<Date>?, calendar: Calendar) -> Int {
         guard let interval,
               let first = calendar.ordinality(of: .day, in: .era, for: interval.lowerBound),
               let last = calendar.ordinality(of: .day, in: .era, for: interval.upperBound)
@@ -1383,7 +1407,7 @@ struct SpendDashboardModel: Equatable, Sendable {
         return value
     }
 
-    private static func safeCostSum(_ values: [Double]) -> Double? {
+    static func safeCostSum(_ values: [Double]) -> Double? {
         guard !values.isEmpty else { return nil }
         var result = 0.0
         for value in values {

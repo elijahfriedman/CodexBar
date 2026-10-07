@@ -470,6 +470,7 @@ public struct ProviderUsagePresentation: Sendable {
     public let secondarySemanticWindow: ProviderSemanticWindow
     public let menuBarLayoutPrimaryLabel: String?
     public let menuBarLayoutSecondaryLabel: String?
+    public let menuBarBalanceDetailLabels: [String]?
     public let requestedMenuBarLaneOrders: [ProviderMenuBarMetric: [ProviderUsageLane]]
     public let automaticSelectionPrioritizesExhaustedWindow: Bool
     public let switcherUsesAutomaticMenuBarWindow: Bool
@@ -499,6 +500,7 @@ public struct ProviderUsagePresentation: Sendable {
         secondarySemanticWindow: ProviderSemanticWindow = .weekly,
         menuBarLayoutPrimaryLabel: String? = nil,
         menuBarLayoutSecondaryLabel: String? = nil,
+        menuBarBalanceDetailLabels: [String]? = nil,
         requestedMenuBarLaneOrders: [ProviderMenuBarMetric: [ProviderUsageLane]] = [:],
         automaticSelectionPrioritizesExhaustedWindow: Bool = true,
         switcherUsesAutomaticMenuBarWindow: Bool = false,
@@ -529,6 +531,7 @@ public struct ProviderUsagePresentation: Sendable {
         self.secondarySemanticWindow = secondarySemanticWindow
         self.menuBarLayoutPrimaryLabel = menuBarLayoutPrimaryLabel
         self.menuBarLayoutSecondaryLabel = menuBarLayoutSecondaryLabel
+        self.menuBarBalanceDetailLabels = menuBarBalanceDetailLabels
         self.requestedMenuBarLaneOrders = requestedMenuBarLaneOrders
         self.automaticSelectionPrioritizesExhaustedWindow = automaticSelectionPrioritizesExhaustedWindow
         self.switcherUsesAutomaticMenuBarWindow = switcherUsesAutomaticMenuBarWindow
@@ -594,9 +597,8 @@ public struct ProviderUsagePresentation: Sendable {
             return order
         }
         return switch metric {
-        case .primary: [.primary, .secondary]
-        case .secondary: [.secondary, .primary]
-        case .tertiary: [.primary, .secondary]
+        case .primary, .tertiary: [.primary, .secondary, .tertiary]
+        case .secondary: [.secondary, .primary, .tertiary]
         default: []
         }
     }
@@ -663,12 +665,7 @@ public struct ProviderUsagePresentation: Sendable {
     }
 
     public static func standardSemanticWindows(snapshot: UsageSnapshot) -> ProviderSemanticWindows {
-        let candidates = [snapshot.primary, snapshot.secondary, snapshot.tertiary]
-            + (snapshot.extraRateWindows ?? []).filter(\.usageKnown).map(\.window)
-        let usable = candidates.compactMap { window -> RateWindow? in
-            guard let window, !window.isSyntheticPlaceholder else { return nil }
-            return window
-        }
+        let usable = snapshot.measuredRateWindows
         return ProviderSemanticWindows(
             session: usable.first { window in
                 guard let minutes = window.windowMinutes else { return false }
