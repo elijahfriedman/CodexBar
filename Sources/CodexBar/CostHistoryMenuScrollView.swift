@@ -1,9 +1,11 @@
 import AppKit
+import QuartzCore
 import SwiftUI
 
 /// Keep the native menu row on screen; only the chart document scrolls when history is tall.
 @MainActor
 final class CostHistoryMenuScrollView: NSScrollView {
+    private let resizeDocument: (CGFloat, CGFloat) -> Void
     private let measureDocument: (CGFloat) -> CGFloat
     private var maximumHeight: CGFloat = 620
     private var measuredWidth: CGFloat?
@@ -11,6 +13,9 @@ final class CostHistoryMenuScrollView: NSScrollView {
     private var viewportSize = NSSize(width: 1, height: 1)
 
     init(hosting: MenuHostingView<some View>, width: CGFloat, maximumHeight: CGFloat) {
+        self.resizeDocument = { width, height in
+            hosting.applyMeasuredHeight(width: width, height: height)
+        }
         self.measureDocument = { width in
             let height = hosting.measuredFittingHeight(width: width)
             hosting.applyMeasuredHeight(width: width, height: height)
@@ -62,6 +67,33 @@ final class CostHistoryMenuScrollView: NSScrollView {
         self.setFrameSize(size)
         self.invalidateIntrinsicContentSize()
         self.tile()
+    }
+
+    /// Resize and publish the selected content in one transaction, before either can paint alone.
+    func adjustDocumentHeight(by delta: CGFloat, updateContent: @MainActor () -> Void) {
+        self.updateDocumentHeight(self.documentHeight + delta, updateContent: updateContent)
+    }
+
+    func updateDocumentHeight(_ height: CGFloat, updateContent: @MainActor () -> Void = {}) {
+        let height = max(1, ceil(height))
+        guard self.documentHeight != height else {
+            updateContent()
+            return
+        }
+        self.window?.disableScreenUpdatesUntilFlush()
+        CATransaction.begin()
+        CATransaction.setDisableActions(true)
+        defer { CATransaction.commit() }
+        NSAnimationContext.runAnimationGroup { context in
+            context.duration = 0
+            context.allowsImplicitAnimation = false
+            self.documentHeight = height
+            self.updateSize(width: self.viewportSize.width, maximumHeight: self.maximumHeight)
+            updateContent()
+            self.resizeDocument(self.viewportSize.width, height)
+            self.superview?.layoutSubtreeIfNeeded()
+            self.window?.invalidateShadow()
+        }
     }
 
     static func maximumHeight(for menu: NSMenu) -> CGFloat {

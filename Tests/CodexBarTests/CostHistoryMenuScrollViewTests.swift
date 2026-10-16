@@ -18,6 +18,36 @@ struct CostHistoryMenuScrollViewTests {
     }
 
     @Test
+    func `content height changes resize the existing native row at the same width`() {
+        let hosting = MenuHostingView(rootView: Color.clear)
+        let viewport = CostHistoryMenuScrollView(hosting: hosting, width: 400, maximumHeight: 620)
+        for value in [360.0, 318.0, 900.0, 318.0, 360.0] {
+            let height = CGFloat(value)
+            viewport.updateDocumentHeight(height)
+            #expect(viewport.documentView === hosting)
+            #expect(hosting.frame.height == height)
+            #expect(hosting.intrinsicContentSize.height == height)
+            #expect(viewport.fittingHeight(width: 400) == min(height, 620))
+            #expect(viewport.intrinsicContentSize.height == min(height, 620))
+            #expect(viewport.frame.width == 400)
+        }
+    }
+
+    @Test
+    func `growth makes room before publishing expanded content`() {
+        let hosting = MenuHostingView(rootView: Color.clear.frame(width: 400, height: 318))
+        let viewport = CostHistoryMenuScrollView(hosting: hosting, width: 400, maximumHeight: 620)
+        var published = false
+        viewport.adjustDocumentHeight(by: 42) {
+            #expect(viewport.frame.height == 360)
+            published = true
+        }
+        #expect(published)
+        #expect(hosting.frame.height == 360)
+        #expect(viewport.documentView === hosting)
+    }
+
+    @Test
     func `repeated sizing preserves document identity and intentional scroll position`() {
         let hosting = MenuHostingView(rootView: Color.clear.frame(width: 400, height: 1400))
         let viewport = CostHistoryMenuScrollView(hosting: hosting, width: 400, maximumHeight: 620)
