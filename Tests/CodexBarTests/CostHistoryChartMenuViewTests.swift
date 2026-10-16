@@ -448,6 +448,23 @@ struct CostHistoryChartMenuViewTests {
 
     @Test
     @MainActor
+    func `screen edge headroom includes overflow and expanded rows but ignores unselectable days`() {
+        let compact = [
+            Self.entry(date: "2026-06-07", modelCount: 2),
+            Self.entry(date: "2026-06-08", modelCount: 1),
+        ]
+        #expect(CostHistoryChartMenuView.maximumDetailHeightGrowth(provider: .codex, daily: compact) == 42)
+        let expanded = [
+            Self.entry(date: "2026-06-07", modelCount: 6, hasModeDetails: true),
+            Self.entry(date: "2026-06-08", modelCount: 1),
+        ]
+        #expect(CostHistoryChartMenuView.maximumDetailHeightGrowth(provider: .codex, daily: expanded) == 177)
+        let unselectable = compact + [Self.entry(date: "invalid-day", modelCount: 6, hasModeDetails: true)]
+        #expect(CostHistoryChartMenuView.maximumDetailHeightGrowth(provider: .codex, daily: unselectable) == 42)
+    }
+
+    @Test
+    @MainActor
     func `cost history expands rows only when the selected day contains mode details`() {
         let compact = CostHistoryChartMenuView._detailViewportConfigurationForTesting(
             provider: .codex,

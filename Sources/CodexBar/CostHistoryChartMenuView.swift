@@ -734,6 +734,20 @@ struct CostHistoryChartMenuView: View {
                 ? self.expandedDetailRowHeight : self.compactDetailRowHeight)
     }
 
+    /// Extra room needed to show any selectable day without moving a constrained native menu.
+    static func maximumDetailHeightGrowth(provider: UsageProvider, daily: [DailyEntry]) -> CGFloat {
+        let model = self.makeModel(provider: provider, daily: daily, metric: self.defaultMetric(
+            provider: provider, daily: daily))
+        let initialEntry = self.defaultSelectedDateKey(model: model).flatMap { model.entriesByDateKey[$0] }
+        let maximumHeight = daily.compactMap { entry -> CGFloat? in
+            guard ChartMetric.allCases.contains(where: {
+                self.chartPointInput(for: entry, provider: provider, metric: $0) != nil
+            }) else { return nil }
+            return self.detailHeight(entry: entry)
+        }.max() ?? 0
+        return max(0, maximumHeight - self.detailHeight(entry: initialEntry))
+    }
+
     private static func gregorianCalendar(timeZone: TimeZone) -> Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = timeZone

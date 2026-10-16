@@ -164,7 +164,9 @@ extension StatusItemController {
         let width = self.renderedMenuWidth(for: menu)
         for item in menu.items {
             (item.view as? CostHistoryMenuScrollView)?.updateSize(
-                width: width, maximumHeight: CostHistoryMenuScrollView.maximumHeight(for: menu))
+                width: width,
+                maximumHeight: CostHistoryMenuScrollView.maximumHeight(for: menu),
+                availableHeightBelowAnchor: CostHistoryMenuScrollView.availableHeightBelowAnchor(for: menu))
         }
         guard let identity = self.hostedSubviewIdentity(for: menu) else {
             self.refreshHostedSubviewHeights(in: menu)
@@ -466,7 +468,10 @@ extension StatusItemController {
         let scrollView = CostHistoryMenuScrollView(
             hosting: hosting,
             width: width,
-            maximumHeight: CostHistoryMenuScrollView.maximumHeight(for: submenu))
+            maximumHeight: CostHistoryMenuScrollView.maximumHeight(for: submenu),
+            maximumHeightGrowth: CostHistoryChartMenuView.maximumDetailHeightGrowth(
+                provider: provider, daily: tokenSnapshot.daily),
+            availableHeightBelowAnchor: CostHistoryMenuScrollView.availableHeightBelowAnchor(for: submenu))
         relay.scrollView = scrollView
 
         let chartItem = NSMenuItem()

@@ -33,6 +33,42 @@ struct CostHistoryMenuScrollViewTests {
         }
     }
 
+    @Test(arguments: [359.0, 360.0, 500.0])
+    func `only menus without enough room below their anchor reserve the largest layout`(available: Double) {
+        let hosting = MenuHostingView(rootView: Color.clear.frame(width: 400, height: 318))
+        let viewport = CostHistoryMenuScrollView(
+            hosting: hosting,
+            width: 400,
+            maximumHeight: 620,
+            maximumHeightGrowth: 42,
+            availableHeightBelowAnchor: CGFloat(available))
+        let constrained = available < 360
+        #expect(viewport.frame.height == (constrained ? 360 : 318))
+        for height in [360.0, 318.0, 360.0, 318.0] {
+            viewport.updateDocumentHeight(CGFloat(height))
+            #expect(viewport.fittingHeight(width: 400) == (constrained ? 360 : CGFloat(height)))
+            #expect(hosting.frame.height == CGFloat(height))
+            #expect(hosting.convert(NSPoint.zero, to: viewport).y == 0)
+        }
+    }
+
+    @Test
+    func `reserved menu height stays bounded and can adapt when reopened at another anchor`() {
+        let hosting = MenuHostingView(rootView: Color.clear.frame(width: 400, height: 600))
+        let viewport = CostHistoryMenuScrollView(
+            hosting: hosting,
+            width: 400,
+            maximumHeight: 620,
+            maximumHeightGrowth: 200,
+            availableHeightBelowAnchor: 610)
+        #expect(viewport.frame.height == 620)
+        viewport.updateSize(width: 400, maximumHeight: 620, availableHeightBelowAnchor: 800)
+        #expect(viewport.frame.height == 600)
+        viewport.updateSize(width: 400, maximumHeight: 620, availableHeightBelowAnchor: 610)
+        #expect(viewport.frame.height == 620)
+        #expect(hosting.frame.height == 600)
+    }
+
     @Test
     func `growth makes room before publishing expanded content`() {
         let hosting = MenuHostingView(rootView: Color.clear.frame(width: 400, height: 318))

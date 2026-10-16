@@ -6,8 +6,8 @@ import Testing
 
 @MainActor
 struct CostHistoryResizeTests {
-    @Test
-    func `hover updates the attached document without changing chart top spacing`() throws {
+    @Test(arguments: [false, true])
+    func `hover keeps chart position stable with dynamic or constrained menu sizing`(constrained: Bool) throws {
         let daily = (1...2).map { day in
             CostUsageDailyReport.Entry(
                 date: "2026-09-0\(day)",
@@ -35,23 +35,31 @@ struct CostHistoryResizeTests {
                     updateContent()
                 }
             }))
-        let viewport = CostHistoryMenuScrollView(hosting: hosting, width: 400, maximumHeight: 620)
+        let growth = CostHistoryChartMenuView.maximumDetailHeightGrowth(provider: .claude, daily: daily)
+        let viewport = CostHistoryMenuScrollView(
+            hosting: hosting,
+            width: 400,
+            maximumHeight: 620,
+            maximumHeightGrowth: growth,
+            availableHeightBelowAnchor: constrained ? 1 : nil)
         relay.viewport = viewport
         hosting.layoutSubtreeIfNeeded()
         let tracking = try #require(Self.trackingView(in: hosting))
         let detailScroller = try #require(Self.detailScroller(in: hosting))
-        let baselineHeight = viewport.frame.height
-        let chartTop = tracking.convert(.zero, to: hosting).y
+        let baselineHeight = hosting.frame.height
+        let reservedHeight = viewport.frame.height
+        let chartTop = tracking.convert(.zero, to: viewport).y
         #expect(chartTop <= 20)
         for fraction in [0.3, 0.8, 0.3, 0.8] {
             tracking.onMoved?(CGPoint(x: tracking.bounds.width * fraction, y: tracking.bounds.midY))
             RunLoop.main.run(until: Date(timeIntervalSinceNow: 0.03))
             hosting.layoutSubtreeIfNeeded()
             let expectedHeight = baselineHeight + (fraction < 0.5 ? 42 : 0)
-            #expect(viewport.frame.height == expectedHeight)
+            #expect(viewport.frame.height == (constrained ? reservedHeight : expectedHeight))
+            #expect(viewport.intrinsicContentSize.height == viewport.frame.height)
             #expect(Self.detailScroller(in: hosting) === detailScroller)
             #expect(hosting.frame.height == expectedHeight)
-            #expect(tracking.convert(.zero, to: hosting).y == chartTop)
+            #expect(tracking.convert(.zero, to: viewport).y == chartTop)
             #expect(viewport.contentView.bounds.origin == .zero)
         }
     }
