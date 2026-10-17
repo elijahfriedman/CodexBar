@@ -24,6 +24,8 @@ struct StatusItemControllerMenuTests {
             self.checkForUpdatesCount += 1
         }
 
+        func checkForUpdatesInBackground() {}
+
         func installUpdate() {
             self.installUpdateCount += 1
         }

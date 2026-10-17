@@ -194,6 +194,9 @@ extension StatusItemController: StatusItemMenuPersistentActionDelegate {
               !scopedRefreshInFlight
         else { return }
 
+        // A user-initiated refresh is also a natural moment to look for a newer CodexBar build.
+        self.updater.checkForUpdatesInBackground()
+
         let frozenModels = tracksFirstPartyCards ? self.frozenManualRefreshMenuCardModels() : [:]
         let viewportRestoreRequests = self.armManualRefreshViewportRestoreRequests(
             originatingMenuID: originatingMenuID,
@@ -339,10 +342,6 @@ extension StatusItemController: StatusItemMenuPersistentActionDelegate {
 
     @objc func installUpdate() {
         self.updater.installUpdate()
-    }
-
-    @objc func checkForUpdates() {
-        self.updater.checkForUpdates(nil)
     }
 
     @objc func openDashboard() {

@@ -53,7 +53,6 @@ extension StatusItemController {
             updateReady: self.updater.updateStatus.isUpdateReady,
             availableUpdateVersion: self.updater.updateStatus.availableVersion,
             isInstallingUpdate: self.updater.updateStatus.isInstalling,
-            canCheckForUpdates: self.updater.isAvailable,
             includeContextualActions: includeContextualActions,
             codexWorkspacesMenuEnabled: codexWorkspacesMenuEnabled,
             isKeepingAwake: self.agentSessions.isKeepingAwake,
@@ -137,8 +136,6 @@ extension StatusItemController {
         switch action {
         case .installUpdate:
             "installUpdate"
-        case .checkForUpdates:
-            "checkForUpdates"
         case .refresh:
             "refresh"
         case .refreshAugmentSession:

@@ -41,12 +41,17 @@ private final class UpdateReadyUpdater: UpdaterProviding {
     let isAvailable = true
     let unavailableReason: String? = nil
     let updateStatus = UpdateStatus()
+    var backgroundCheckCount = 0
 
     init() {
         self.updateStatus.isUpdateReady = true
     }
 
     func checkForUpdates(_: Any?) {}
+    func checkForUpdatesInBackground() {
+        self.backgroundCheckCount += 1
+    }
+
     func installUpdate() {}
 }
 
@@ -961,6 +966,21 @@ extension StatusMenuPersistentRefreshTests {
         #expect(requestCount == 0)
         #expect(controller.manualRefreshTasks.isEmpty)
         #expect(!controller.menuCardRefreshMonitor.isManualRefreshInFlight)
+    }
+
+    @Test
+    func `manual refresh also checks for updates in the background`() async throws {
+        let settings = self.makeSettings()
+        settings.refreshFrequency = .manual
+        let updater = UpdateReadyUpdater()
+        let controller = self.makeController(settings: settings, updater: updater)
+        controller._test_manualRefreshOperation = {}
+
+        controller.refreshNow()
+        let task = try #require(controller.manualRefreshTasks[.global])
+        await task.value
+
+        #expect(updater.backgroundCheckCount == 1)
     }
 
     @Test

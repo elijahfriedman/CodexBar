@@ -4,16 +4,22 @@ import Testing
 
 @MainActor
 struct MenuDescriptorUpdateAndVersionTests {
-    @Test(arguments: [false, true], [false, true])
-    func `update availability and readiness select exactly one action`(available: Bool, ready: Bool) {
-        let descriptor = self.descriptor(available: available, ready: ready, version: "1.2.3")
-        let actions = descriptor.sections.flatMap(\.entries).compactMap { entry -> MenuDescriptor.MenuAction? in
+    @Test(arguments: [nil, "9.9.9"], [false, true])
+    func `menu offers an install action only when an update is known`(available: String?, ready: Bool) {
+        let descriptor = self.descriptor(availableVersion: available, ready: ready, version: "1.2.3")
+        let entries = descriptor.sections.flatMap(\.entries)
+        let actions = entries.compactMap { entry -> MenuDescriptor.MenuAction? in
             guard case let .action(_, action) = entry else { return nil }
             return action
         }
+        let labels = entries.compactMap { entry -> String? in
+            guard case let .action(label, _) = entry else { return nil }
+            return label
+        }
 
-        #expect(actions.contains(.installUpdate) == ready)
-        #expect(actions.contains(.checkForUpdates) == (available && !ready))
+        #expect(actions.contains(.installUpdate) == (ready || available != nil))
+        #expect(labels.contains(String(format: L("Update to %@"), "9.9.9")) == (available != nil && !ready))
+        #expect(!labels.contains(L("check_for_updates")))
         #expect(actions.contains(.refresh))
         #expect(actions.contains(.settings))
         #expect(actions.contains(.about))
@@ -22,7 +28,7 @@ struct MenuDescriptorUpdateAndVersionTests {
 
     @Test(arguments: ["", "1.2.3", "1.2.3beta4"])
     func `about label includes only a known short version`(version: String) {
-        let descriptor = self.descriptor(available: false, ready: false, version: version)
+        let descriptor = self.descriptor(ready: false, version: version)
         let labels = descriptor.sections.flatMap(\.entries).compactMap { entry -> String? in
             guard case let .action(label, .about) = entry else { return nil }
             return label
@@ -39,7 +45,7 @@ struct MenuDescriptorUpdateAndVersionTests {
         ("v1.2.", "1.2"),
     ])
     func `provider headline retains its first numeric version`(raw: String, expected: String) throws {
-        let descriptor = self.descriptor(available: false, ready: false, version: "", providerVersion: raw)
+        let descriptor = self.descriptor(ready: false, version: "", providerVersion: raw)
         let headlines = descriptor.sections.flatMap(\.entries).compactMap { entry -> String? in
             guard case let .text(label, .headline) = entry else { return nil }
             return label
@@ -49,13 +55,12 @@ struct MenuDescriptorUpdateAndVersionTests {
     }
 
     @Test
-    func `update actions have distinct menu symbols`() {
-        #expect(MenuDescriptor.MenuAction.checkForUpdates.systemImageName == "arrow.triangle.2.circlepath.circle")
+    func `install update action has its menu symbol`() {
         #expect(MenuDescriptor.MenuAction.installUpdate.systemImageName == "arrow.down.circle")
     }
 
     private func descriptor(
-        available: Bool,
+        availableVersion: String? = nil,
         ready: Bool,
         version: String,
         providerVersion: String? = nil) -> MenuDescriptor
@@ -80,7 +85,7 @@ struct MenuDescriptorUpdateAndVersionTests {
             settings: settings,
             account: AccountInfo(email: nil, plan: nil),
             updateReady: ready,
-            canCheckForUpdates: available,
+            availableUpdateVersion: availableVersion,
             versionText: version,
             includeContextualActions: false)
     }

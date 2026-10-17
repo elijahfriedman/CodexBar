@@ -153,6 +153,10 @@ final class HomebrewUpdaterController: UpdaterProviding {
         self.startCheck(source: .manual)
     }
 
+    func checkForUpdatesInBackground() {
+        self.startCheck(source: .manual)
+    }
+
     private func startCheck(source: CheckSource) {
         guard self.activeCheck == nil, self.phase != .installing else { return }
         self.activeCheck = Task { [weak self] in

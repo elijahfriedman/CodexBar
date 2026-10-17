@@ -156,6 +156,8 @@ protocol UpdaterProviding: AnyObject {
     var unavailableReason: String? { get }
     var updateStatus: UpdateStatus { get }
     func checkForUpdates(_ sender: Any?)
+    /// Checks without user-facing "up to date" or error UI; only an available update is surfaced.
+    func checkForUpdatesInBackground()
     func installUpdate()
 }
 
@@ -172,6 +174,7 @@ final class DisabledUpdaterController: UpdaterProviding {
     }
 
     func checkForUpdates(_ sender: Any?) {}
+    func checkForUpdatesInBackground() {}
     func installUpdate() {}
 }
 
@@ -225,6 +228,10 @@ final class SparkleUpdaterController: NSObject, UpdaterProviding, SPUUpdaterDele
         self.dockPresentationAttemptID = DockIconController.shared.promote(
             presentationTimeout: Self.presentationTimeout)
         self.controller.checkForUpdates(sender)
+    }
+
+    func checkForUpdatesInBackground() {
+        self.controller.updater.checkForUpdatesInBackground()
     }
 
     func installUpdate() {
