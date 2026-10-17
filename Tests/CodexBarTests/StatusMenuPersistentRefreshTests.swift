@@ -973,6 +973,7 @@ extension StatusMenuPersistentRefreshTests {
         let settings = self.makeSettings()
         settings.refreshFrequency = .manual
         let updater = UpdateReadyUpdater()
+        updater.updateStatus.isUpdateReady = false
         let controller = self.makeController(settings: settings, updater: updater)
         controller._test_manualRefreshOperation = {}
 
@@ -981,6 +982,24 @@ extension StatusMenuPersistentRefreshTests {
         await task.value
 
         #expect(updater.backgroundCheckCount == 1)
+    }
+
+    @Test(arguments: ["ready", "available", "installing"])
+    func `manual refresh skips the update check once an update is known`(state: String) async throws {
+        let settings = self.makeSettings()
+        settings.refreshFrequency = .manual
+        let updater = UpdateReadyUpdater()
+        updater.updateStatus.isUpdateReady = state == "ready"
+        updater.updateStatus.availableVersion = state == "available" ? "9.9.9" : nil
+        updater.updateStatus.isInstalling = state == "installing"
+        let controller = self.makeController(settings: settings, updater: updater)
+        controller._test_manualRefreshOperation = {}
+
+        controller.refreshNow()
+        let task = try #require(controller.manualRefreshTasks[.global])
+        await task.value
+
+        #expect(updater.backgroundCheckCount == 0)
     }
 
     @Test
