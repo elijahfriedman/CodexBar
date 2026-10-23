@@ -10,10 +10,10 @@ struct SettingsWindowAppearanceTests {
         #expect(SettingsPane.sidebarWidth == 260)
         #expect(SettingsPane.sidebarMinWidth < SettingsPane.sidebarWidth)
         #expect(SettingsPane.sidebarMaxWidth > SettingsPane.sidebarWidth)
-        #expect(SettingsPane.detailMaxWidth > SettingsPane.windowMinWidth - SettingsPane.sidebarWidth)
         // The static window minimum must leave a usable detail pane even at the widest
         // sidebar; this is what lets window sizing stay independent of the drag state.
         #expect(SettingsPane.windowMinWidth - SettingsPane.sidebarMaxWidth >= 400)
+        #expect(SettingsPane.windowMaxWidth > SettingsPane.windowWidth)
     }
 
     @Test
@@ -50,7 +50,7 @@ struct SettingsWindowAppearanceTests {
             defer: false)
         let originalMaxY = window.frame.maxY
 
-        SettingsWindowSizing.enforceMinimumSize(window)
+        SettingsWindowSizing.enforceSizeLimits(window)
 
         #expect(window.minSize.width == SettingsPane.windowMinWidth)
         #expect(window.minSize.height >= SettingsPane.windowMinHeight)
@@ -68,11 +68,28 @@ struct SettingsWindowAppearanceTests {
             defer: false)
         let originalFrame = window.frame
 
-        SettingsWindowSizing.enforceMinimumSize(window)
+        SettingsWindowSizing.enforceSizeLimits(window)
 
         #expect(window.frame == originalFrame)
         #expect(window.minSize.width == SettingsPane.windowMinWidth)
         #expect(window.minSize.height >= SettingsPane.windowMinHeight)
+    }
+
+    @Test
+    func `settings window sizing caps over wide saved frames`() {
+        let window = NSWindow(
+            contentRect: NSRect(x: 120, y: 160, width: 1800, height: SettingsPane.windowHeight),
+            styleMask: [.titled],
+            backing: .buffered,
+            defer: false)
+        let originalFrame = window.frame
+
+        SettingsWindowSizing.enforceSizeLimits(window)
+
+        #expect(window.maxSize.width == SettingsPane.windowMaxWidth)
+        #expect(window.frame.width == SettingsPane.windowMaxWidth)
+        #expect(window.frame.origin == originalFrame.origin)
+        #expect(window.frame.height == originalFrame.height)
     }
 
     @Test
@@ -92,7 +109,7 @@ struct SettingsWindowAppearanceTests {
         splitView.addSubview(detail)
         window.contentView = splitView
 
-        SettingsWindowSizing.enforceMinimumSize(window)
+        SettingsWindowSizing.enforceSizeLimits(window)
 
         #expect(window.frame.width >= window.minSize.width)
         #expect(sidebar.frame.width == 0)

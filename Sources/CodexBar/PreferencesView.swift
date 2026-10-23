@@ -20,12 +20,12 @@ enum SettingsPane: Hashable {
     static let windowWidth: CGFloat = 880
     static let windowHeight: CGFloat = 620
     static let windowMinWidth: CGFloat = 800
+    static let windowMaxWidth: CGFloat = 1040
     static let windowMinHeight: CGFloat = 540
     static let sidebarWidth: CGFloat = 260
     static let sidebarMinWidth: CGFloat = 200
     static let sidebarMaxWidth: CGFloat = 380
     static let sidebarWidthDefaultsKey = "settingsSidebarWidth"
-    static let detailMaxWidth: CGFloat = 780
 
     var title: String {
         switch self {
@@ -106,7 +106,7 @@ struct PreferencesView: View {
         .frame(
             minWidth: SettingsPane.windowMinWidth,
             idealWidth: SettingsPane.windowWidth,
-            maxWidth: .infinity,
+            maxWidth: SettingsPane.windowMaxWidth,
             minHeight: SettingsPane.windowMinHeight,
             idealHeight: SettingsPane.windowHeight,
             maxHeight: .infinity)
@@ -141,10 +141,6 @@ struct PreferencesView: View {
                 .modifier(SettingsSidebarSizing(width: self.$sidebarWidth))
         } detail: {
             self.detailView
-                .frame(
-                    maxWidth: SettingsPane.detailMaxWidth,
-                    maxHeight: .infinity,
-                    alignment: .topLeading)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 .navigationTitle(self.selection.title)
                 // Panes that draw their own heading keep the window title for accessibility and the
@@ -188,10 +184,6 @@ struct PreferencesView: View {
                 .ignoresSafeArea()
 
             self.detailView
-                .frame(
-                    maxWidth: SettingsPane.detailMaxWidth,
-                    maxHeight: .infinity,
-                    alignment: .topLeading)
                 .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
                 // The panes hide their scroll background, and the window uses a transparent full-size
                 // titlebar, so without an opaque detail backing the grouped Form content renders through
@@ -292,18 +284,19 @@ struct PreferencesView: View {
 
 @MainActor
 enum SettingsWindowSizing {
-    static func enforceMinimumSize(_ window: NSWindow) {
+    static func enforceSizeLimits(_ window: NSWindow) {
         let toolbarHeight = max(0, window.frame.height - window.contentLayoutRect.height)
         let minimumSize = NSSize(
             width: SettingsPane.windowMinWidth,
             height: SettingsPane.windowMinHeight + toolbarHeight)
         window.minSize = minimumSize
+        window.maxSize = NSSize(width: SettingsPane.windowMaxWidth, height: CGFloat.greatestFiniteMagnitude)
 
-        if window.frame.width < minimumSize.width || window.frame.height < minimumSize.height {
+        let repairedSize = NSSize(
+            width: min(max(window.frame.width, minimumSize.width), SettingsPane.windowMaxWidth),
+            height: max(window.frame.height, minimumSize.height))
+        if repairedSize != window.frame.size {
             var frame = window.frame
-            let repairedSize = NSSize(
-                width: max(frame.width, minimumSize.width),
-                height: max(frame.height, minimumSize.height))
             frame.origin.y += frame.height - repairedSize.height
             frame.size = repairedSize
             window.setFrame(frame, display: true)
@@ -347,14 +340,14 @@ enum SettingsWindowAppearance {
         application: NSApplication = NSApp,
         scheduleReset: ResetScheduler = Self.scheduleReset)
     {
-        SettingsWindowSizing.enforceMinimumSize(window)
+        SettingsWindowSizing.enforceSizeLimits(window)
         window.appearanceSource = application
         // Pulse the exact effective appearance so the native toolbar redraws without
         // dropping inherited accessibility attributes, then restore KVO inheritance.
         window.appearance = application.effectiveAppearance
         scheduleReset { [weak window] in
             if let window {
-                SettingsWindowSizing.enforceMinimumSize(window)
+                SettingsWindowSizing.enforceSizeLimits(window)
             }
             window?.appearance = nil
             window?.viewsNeedDisplay = true

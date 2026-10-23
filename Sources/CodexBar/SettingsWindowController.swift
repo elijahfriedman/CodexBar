@@ -91,7 +91,7 @@ final class SettingsWindowController: NSWindowController {
             window.title = selection.title
             SettingsWindowToolbar.configure(window)
             window.isReleasedWhenClosed = false
-            SettingsWindowSizing.enforceMinimumSize(window)
+            SettingsWindowSizing.enforceSizeLimits(window)
             if !window.setFrameUsingName(SettingsWindowIdentity.frameAutosaveName) {
                 window.center()
             }
