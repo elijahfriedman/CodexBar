@@ -163,7 +163,7 @@ class InstallTests(unittest.TestCase):
             self.assertTrue(settings['allAccounts'])
             self.assertFalse(settings['showTray'])
             self.assertEqual(len(list((shell.parent / 'plugins').glob('*/manifest.json'))), 1)
-            sources = Path(__file__).resolve().parents[2] / 'Sources/CodexBar/Resources'
+            sources = Path(__file__).resolve().parents[2] / 'Sources/CodexBar/Resources/ProviderIcons/Monochrome'
             installed = shell.parent / 'plugins/steipete.codexbar/icons'
             logos = sorted(sources.glob('ProviderIcon-*.svg'))
             self.assertTrue(logos)

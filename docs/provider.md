@@ -269,7 +269,7 @@ Adding a first-party provider currently requires all of these registration point
 4. Run `Scripts/regenerate-provider-manifests.sh`. Do not edit `ProviderManifest.swift`,
    `ProviderImplementationManifest.swift`, or `ProviderInstanceIDAliases.generated.swift` directly. The generator also
    refreshes `docs/provider-ids.md`, which is linked from `docs/configuration.md`.
-5. Add `Sources/CodexBar/Resources/ProviderIcon-<id>.svg` and reference it from the descriptor's branding.
+5. Add `Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-<id>.svg` and reference it from the descriptor's branding.
 6. Unless the descriptor sets `widgetSelectable: false`, add the matching case and literal
    `caseDisplayRepresentations` entry to the WidgetKit `ProviderChoice` `AppEnum`. AppIntents extracts this table
    statically, so widget display representations cannot be derived at runtime. `WidgetProviderChoiceTests` keeps the

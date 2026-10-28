@@ -138,7 +138,8 @@ See the canonical [provider authoring guide](provider.md#adding-a-new-provider) 
 4. Add an app-side `ProviderImplementation` under `Sources/CodexBar/Providers/YourProvider/`; implementations can use
    protocol defaults when no custom UI or macOS integration is needed.
 5. Run `Scripts/regenerate-provider-manifests.sh` to update the Core descriptor manifest and the immutable app catalog.
-6. Add icon assets under `Sources/CodexBar/Resources/`.
+6. Add icon assets under `Sources/CodexBar/Resources/ProviderIcons/`: the monochrome template SVG in `Monochrome/`,
+   plus an optional full-color `Brand-ProviderIcon-<id>` SVG/PNG in `Brand/`.
 7. Add focused tests under `Tests/CodexBarTests/` and, for CLI/core behavior that must run on Linux, `TestsLinux/`.
 
 ### Debug Cookie Issues

@@ -160,7 +160,7 @@ Hidden={'true' if startup_disabled else 'false'}
         icons = plugin / 'icons'
         icons.mkdir()
         # A checkout keeps the marks in Sources; a release archive carries them beside the panel.
-        for folder in [REPO / 'Sources/CodexBar/Resources', REPO / 'Integrations/Omarchy/icons']:
+        for folder in [REPO / 'Sources/CodexBar/Resources/ProviderIcons/Monochrome', REPO / 'Integrations/Omarchy/icons']:
             for source in sorted(folder.glob('ProviderIcon-*.svg')):
                 shutil.copy2(source, icons / source.name)
         shutil.copy2(shell_path, shell_path.with_name(f'shell.json.codexbar-backup-{stamp}'))

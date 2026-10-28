@@ -95,7 +95,7 @@ struct ProviderArchitectureGatekeeperTests {
     @Test
     func `every provider descriptor has a loadable SVG resource`() throws {
         let resources = try Self.repoRoot()
-            .appending(path: "Sources/CodexBar/Resources", directoryHint: .isDirectory)
+            .appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
 
         for descriptor in ProviderDescriptorRegistry.all {
             let resourceName = descriptor.branding.iconResourceName

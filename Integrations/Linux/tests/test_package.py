@@ -45,7 +45,7 @@ class PackageTests(unittest.TestCase):
                 fixed = {'bin/codexbar-linux', 'README.md', 'LICENSE', 'THIRD_PARTY_NOTICES', 'Integrations/Linux/install.py',
                          'Integrations/Linux/icon.svg', 'Integrations/Omarchy/Panel.qml',
                          'Integrations/Omarchy/manifest.json'}
-                logos = sorted((REPO / 'Sources/CodexBar/Resources').glob('ProviderIcon-*.svg'))
+                logos = sorted((REPO / 'Sources/CodexBar/Resources/ProviderIcons/Monochrome').glob('ProviderIcon-*.svg'))
                 self.assertTrue(logos)
                 self.assertEqual(names, fixed | {f'Integrations/Omarchy/icons/{logo.name}' for logo in logos})
                 self.assertFalse(any('linux.json' in name for name in archive.getnames()))

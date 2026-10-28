@@ -4,9 +4,9 @@ ProviderIcon SVGs. The serve web dashboard embeds these because the CLI is
 deployed as a standalone binary without a SwiftPM resource bundle."""
 import base64, glob, os
 os.chdir(os.path.join(os.path.dirname(__file__), ".."))
-files = sorted(glob.glob("Sources/CodexBar/Resources/ProviderIcon-*.svg"))
+files = sorted(glob.glob("Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-*.svg"))
 out = [
-    "// Generated from Sources/CodexBar/Resources/ProviderIcon-*.svg — do not edit by hand.",
+    "// Generated from Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-*.svg — do not edit by hand.",
     "// Regenerate with: python3 Scripts/generate_serve_provider_icons.py",
     "// Embedded (not Bundle.module) because the CLI ships as a standalone binary",
     "// without a SwiftPM resource bundle next to it.",

@@ -42,7 +42,7 @@ def main():
                  'Integrations/Omarchy/Panel.qml', 'Integrations/Omarchy/manifest.json']:
         files[path] = REPO / path
     # The adapter reads these beside itself; an archive without them falls back to text tags.
-    for icon in sorted((REPO / 'Sources/CodexBar/Resources').glob('ProviderIcon-*.svg')):
+    for icon in sorted((REPO / 'Sources/CodexBar/Resources/ProviderIcons/Monochrome').glob('ProviderIcon-*.svg')):
         files[f'Integrations/Omarchy/icons/{icon.name}'] = icon
     # Explicit allowlist: never archive the checkout, user config, or local CLI resource tree.
     with tarfile.open(destination, 'w:gz') as archive:

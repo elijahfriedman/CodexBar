@@ -9,7 +9,7 @@ struct ProviderIconResourcesTests {
     @Test
     func `groq and grok provider icons are distinct`() throws {
         let root = try Self.repoRoot()
-        let resources = root.appending(path: "Sources/CodexBar/Resources", directoryHint: .isDirectory)
+        let resources = root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
         let groq = try String(contentsOf: resources.appending(path: "ProviderIcon-groq.svg"), encoding: .utf8)
         let grok = try String(contentsOf: resources.appending(path: "ProviderIcon-grok.svg"), encoding: .utf8)
 
@@ -19,7 +19,7 @@ struct ProviderIconResourcesTests {
     @Test
     func `grok and xai provider icons are distinct`() throws {
         let root = try Self.repoRoot()
-        let resources = root.appending(path: "Sources/CodexBar/Resources", directoryHint: .isDirectory)
+        let resources = root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
         let grok = try String(contentsOf: resources.appending(path: "ProviderIcon-grok.svg"), encoding: .utf8)
         let xai = try String(contentsOf: resources.appending(path: "ProviderIcon-xai.svg"), encoding: .utf8)
 
@@ -83,7 +83,7 @@ struct ProviderIconResourcesTests {
     func `replicate uses the official glyph across app website and serve`() throws {
         let root = try Self.repoRoot()
         let svg = try String(
-            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcon-replicate.svg"),
+            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-replicate.svg"),
             encoding: .utf8)
         #expect(svg.contains("fill=\"currentColor\""))
         #expect(svg.contains("viewBox=\"-125 -125 1250 1250\""))
@@ -105,7 +105,7 @@ struct ProviderIconResourcesTests {
     func `devin uses the official hexagonal mark across app website and serve`() throws {
         let root = try Self.repoRoot()
         let svg = try String(
-            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcon-devin.svg"),
+            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-devin.svg"),
             encoding: .utf8)
         #expect(svg.contains("fill=\"currentColor\""))
         #expect(svg.contains("viewBox=\"0 0 128 128\""))
@@ -129,7 +129,7 @@ struct ProviderIconResourcesTests {
     func `typesafe keeps its proportions across app website and serve`() throws {
         let root = try Self.repoRoot()
         let svg = try String(
-            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcon-typesafe.svg"),
+            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-typesafe.svg"),
             encoding: .utf8)
         #expect(svg.contains("fill=\"currentColor\""))
         #expect(svg.contains("viewBox=\"24.68 24.68 350.65 350.65\""))
@@ -183,7 +183,7 @@ struct ProviderIconResourcesTests {
     func `pi provider icon is a transparent vector template`() throws {
         let root = try Self.repoRoot()
         let resourceURL = root
-            .appending(path: "Sources/CodexBar/Resources", directoryHint: .isDirectory)
+            .appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
             .appending(path: "ProviderIcon-pi.svg")
         let svg = try String(contentsOf: resourceURL, encoding: .utf8)
 
