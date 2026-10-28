@@ -50,7 +50,9 @@ for (const entry of entries) {
   entry.color = descriptor?.match(/color: (?:ProviderColor|\.init)\(hex: 0x([A-Fa-f0-9]{6})\)/u)?.[1];
   assert(entry.color, `Missing hex branding for ${entry.id}`);
   entry.auth = descriptor.includes("webSource:") ? "cookies" : "apiKey";
-  update(`docs/logos/${entry.id}.svg`, () => read(`Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-${entry.id}.svg`));
+  update(`docs/logos/${entry.id}.svg`, () =>
+    read(`Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-${entry.id}.svg`),
+  );
 }
 const html = (value) => value.replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll('"', "&quot;");
 const section = (text, lines) => {
