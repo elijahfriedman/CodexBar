@@ -10,7 +10,7 @@ struct ProviderIconResourcesTests {
     func `workbuddy uses its mascot consistently across app website and serve`() throws {
         let root = try Self.repoRoot()
         let svg = try String(
-            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcon-workbuddy.svg"),
+            contentsOf: Self.monochromeIconURL(in: root, "ProviderIcon-workbuddy"),
             encoding: .utf8)
         #expect(svg.contains("M18.777 1.647"))
         #expect(svg.contains("fill=\"currentColor\""))
@@ -25,7 +25,7 @@ struct ProviderIconResourcesTests {
     @Test
     func `groq and grok provider icons are distinct`() throws {
         let root = try Self.repoRoot()
-        let resources = root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
+        let resources = Self.monochromeIconsDirectory(in: root)
         let groq = try String(contentsOf: resources.appending(path: "ProviderIcon-groq.svg"), encoding: .utf8)
         let grok = try String(contentsOf: resources.appending(path: "ProviderIcon-grok.svg"), encoding: .utf8)
 
@@ -35,7 +35,7 @@ struct ProviderIconResourcesTests {
     @Test
     func `grok and xai provider icons are distinct`() throws {
         let root = try Self.repoRoot()
-        let resources = root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
+        let resources = Self.monochromeIconsDirectory(in: root)
         let grok = try String(contentsOf: resources.appending(path: "ProviderIcon-grok.svg"), encoding: .utf8)
         let xai = try String(contentsOf: resources.appending(path: "ProviderIcon-xai.svg"), encoding: .utf8)
 
@@ -99,7 +99,7 @@ struct ProviderIconResourcesTests {
     func `replicate uses the official glyph across app website and serve`() throws {
         let root = try Self.repoRoot()
         let svg = try String(
-            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-replicate.svg"),
+            contentsOf: Self.monochromeIconURL(in: root, "ProviderIcon-replicate"),
             encoding: .utf8)
         #expect(svg.contains("fill=\"currentColor\""))
         #expect(svg.contains("viewBox=\"-125 -125 1250 1250\""))
@@ -121,7 +121,7 @@ struct ProviderIconResourcesTests {
     func `devin uses the official hexagonal mark across app website and serve`() throws {
         let root = try Self.repoRoot()
         let svg = try String(
-            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-devin.svg"),
+            contentsOf: Self.monochromeIconURL(in: root, "ProviderIcon-devin"),
             encoding: .utf8)
         #expect(svg.contains("fill=\"currentColor\""))
         #expect(svg.contains("viewBox=\"0 0 128 128\""))
@@ -145,7 +145,7 @@ struct ProviderIconResourcesTests {
     func `typesafe keeps its proportions across app website and serve`() throws {
         let root = try Self.repoRoot()
         let svg = try String(
-            contentsOf: root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome/ProviderIcon-typesafe.svg"),
+            contentsOf: Self.monochromeIconURL(in: root, "ProviderIcon-typesafe"),
             encoding: .utf8)
         #expect(svg.contains("fill=\"currentColor\""))
         #expect(svg.contains("viewBox=\"24.68 24.68 350.65 350.65\""))
@@ -198,9 +198,7 @@ struct ProviderIconResourcesTests {
     @Test
     func `pi provider icon is a transparent vector template`() throws {
         let root = try Self.repoRoot()
-        let resourceURL = root
-            .appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
-            .appending(path: "ProviderIcon-pi.svg")
+        let resourceURL = Self.monochromeIconURL(in: root, "ProviderIcon-pi")
         let svg = try String(contentsOf: resourceURL, encoding: .utf8)
 
         #expect(!svg.contains("<text"))
@@ -356,6 +354,14 @@ struct ProviderIconResourcesTests {
             #expect(greenPixels > 5)
         }
         #expect((bitmap.colorAt(x: 0, y: 0)?.alphaComponent ?? 1) == 0)
+    }
+
+    private static func monochromeIconsDirectory(in root: URL) -> URL {
+        root.appending(path: "Sources/CodexBar/Resources/ProviderIcons/Monochrome", directoryHint: .isDirectory)
+    }
+
+    private static func monochromeIconURL(in root: URL, _ resourceName: String) -> URL {
+        self.monochromeIconsDirectory(in: root).appending(path: "\(resourceName).svg")
     }
 
     private static func repoRoot() throws -> URL {
