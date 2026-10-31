@@ -1,4 +1,3 @@
-import Charts
 import CodexBarCore
 import SwiftUI
 
@@ -44,7 +43,7 @@ struct SpendDashboardSummary: View {
 
             if spendDashboardHasTokenMix(self.group) {
                 Divider()
-                SpendTokenMixChart(mix: self.group.tokenMix)
+                SpendTokenMixValues(mix: self.group.tokenMix)
             }
 
             Text(
@@ -130,7 +129,7 @@ private struct SpendSummaryValue: View {
     }
 }
 
-private struct SpendTokenMixChart: View {
+private struct SpendTokenMixValues: View {
     let mix: CostUsageTokenMix
 
     private struct Segment: Identifiable {
@@ -152,27 +151,12 @@ private struct SpendTokenMixChart: View {
 
     var body: some View {
         let segments = self.segments
-        let plotted = segments.filter { ($0.tokens ?? 0) > 0 }
         VStack(alignment: .leading, spacing: 10) {
             Text(L("Tokens"))
                 .font(.caption.weight(.medium))
                 .foregroundStyle(.secondary)
 
-            if !plotted.isEmpty {
-                Chart(plotted) { segment in
-                    BarMark(
-                        x: .value(L("Tokens"), segment.tokens ?? 0),
-                        y: .value(L("Tokens"), L("Tokens")))
-                        .foregroundStyle(segment.color)
-                }
-                .chartXAxis(.hidden)
-                .chartYAxis(.hidden)
-                .chartLegend(.hidden)
-                .frame(height: 10)
-                .clipShape(Capsule())
-                .accessibilityHidden(true)
-            }
-
+            // Cache and reasoning counters can overlap input and output; keep them separate.
             LazyVGrid(
                 columns: [GridItem(.adaptive(minimum: 100, maximum: 160), spacing: 12)],
                 alignment: .leading,

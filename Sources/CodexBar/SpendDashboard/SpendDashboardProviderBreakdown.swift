@@ -103,34 +103,21 @@ struct SpendProviderBreakdownRows: View {
     @State private var expandedProviders: Set<UsageProvider> = []
 
     var body: some View {
+        let breakdowns = self.breakdowns
+        let shares = spendDashboardShares(breakdowns, cost: \.totalCost, tokens: \.totalTokens)
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(Array(self.breakdowns.enumerated()), id: \.element.id) { index, breakdown in
+            ForEach(Array(breakdowns.enumerated()), id: \.element.id) { index, breakdown in
                 if index > 0 {
                     Divider()
                         .padding(.vertical, 8)
                 }
-                self.providerGroup(breakdown)
+                self.providerGroup(breakdown, share: breakdowns.count > 1 ? shares[breakdown.id] : nil)
             }
         }
     }
 
     private var breakdowns: [SpendProviderBreakdown] {
         spendDashboardProviderBreakdowns(self.group)
-    }
-
-    /// Share of the group total, by spend when priced and by tokens otherwise; hidden for a single provider.
-    private func share(of breakdown: SpendProviderBreakdown) -> Double? {
-        let breakdowns = self.breakdowns
-        guard breakdowns.count > 1 else { return nil }
-        if let cost = breakdown.totalCost {
-            let total = breakdowns.compactMap(\.totalCost).reduce(0, +)
-            return total > 0 ? min(1, max(0, cost / total)) : nil
-        }
-        if let tokens = breakdown.totalTokens {
-            let total = breakdowns.compactMap(\.totalTokens).reduce(0, +)
-            return total > 0 ? min(1, max(0, Double(tokens) / Double(total))) : nil
-        }
-        return nil
     }
 
     private func showsSubscriptionChildren(_ breakdown: SpendProviderBreakdown) -> Bool {
@@ -140,7 +127,7 @@ struct SpendProviderBreakdownRows: View {
             }
     }
 
-    private func providerGroup(_ breakdown: SpendProviderBreakdown) -> some View {
+    private func providerGroup(_ breakdown: SpendProviderBreakdown, share: Double?) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
                 SpendProviderIcon(provider: breakdown.provider, size: 22)
@@ -149,7 +136,7 @@ struct SpendProviderBreakdownRows: View {
                         .font(.headline)
                         .lineLimit(1)
                         .help(breakdown.displayName)
-                    if let share = self.share(of: breakdown) {
+                    if let share {
                         ProgressView(value: share)
                             .progressViewStyle(.linear)
                             .controlSize(.mini)

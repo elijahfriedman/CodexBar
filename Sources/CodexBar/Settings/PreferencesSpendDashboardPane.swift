@@ -948,8 +948,10 @@ private struct SpendProjectRows: View {
     private static let collapsedRowCount = 8
 
     var body: some View {
+        let rows = self.rows
+        let shares = spendDashboardShares(rows, cost: \.totalCost, tokens: \.totalTokens)
         VStack(alignment: .leading, spacing: 0) {
-            ForEach(self.visibleRows) { row in
+            ForEach(rows.prefix(self.showsAllRows ? rows.count : Self.collapsedRowCount)) { row in
                 let identity = row.displayIdentity(hidePersonalInfo: self.hidePersonalInfo)
                 if row.rank > 1 {
                     Divider()
@@ -970,7 +972,7 @@ private struct SpendProjectRows: View {
                         Text(row.providerName)
                             .font(.caption)
                             .foregroundStyle(.secondary)
-                        if let share = self.share(of: row) {
+                        if let share = shares[row.id] {
                             ProgressView(value: share)
                                 .progressViewStyle(.linear)
                                 .controlSize(.mini)
@@ -978,7 +980,7 @@ private struct SpendProjectRows: View {
                                 .accessibilityHidden(true)
                         }
                         if let path = identity.path,
-                           row.needsPathDisambiguation(in: self.rows)
+                           row.needsPathDisambiguation(in: rows)
                         {
                             Text(path)
                                 .font(.caption)
@@ -998,27 +1000,10 @@ private struct SpendProjectRows: View {
                 .padding(.vertical, 9)
             }
             SpendPanelExpandButton(
-                rowCount: self.rows.count,
+                rowCount: rows.count,
                 collapsedRowCount: Self.collapsedRowCount,
                 showsAllRows: self.$showsAllRows)
         }
-    }
-
-    private func share(of row: SpendDashboardModel.ProjectRow) -> Double? {
-        let rows = self.rows
-        if let cost = row.totalCost {
-            let total = rows.compactMap(\.totalCost).reduce(0, +)
-            return total > 0 ? min(1, max(0, cost / total)) : nil
-        }
-        if let tokens = row.totalTokens {
-            let total = rows.compactMap(\.totalTokens).reduce(0, +)
-            return total > 0 ? min(1, max(0, Double(tokens) / Double(total))) : nil
-        }
-        return nil
-    }
-
-    private var visibleRows: ArraySlice<SpendDashboardModel.ProjectRow> {
-        self.rows.prefix(self.showsAllRows ? self.rows.count : Self.collapsedRowCount)
     }
 
     private var rows: [SpendDashboardModel.ProjectRow] {
