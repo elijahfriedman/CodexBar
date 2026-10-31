@@ -7,23 +7,28 @@ struct SpendTimeZoneControls: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 6) {
-            Text(L("Statistics time zone"))
-                .font(.subheadline.weight(.medium))
+            LabeledContent(L("Statistics time zone")) {
+                self.picker
+            }
             ViewThatFits(in: .horizontal) {
-                HStack(spacing: 12) {
-                    self.picker
+                HStack(alignment: .firstTextBaseline, spacing: 12) {
+                    self.footnote
+                    Spacer(minLength: 0)
                     self.currentZoneButton
                 }
                 VStack(alignment: .leading, spacing: 6) {
-                    self.picker
+                    self.footnote
                     self.currentZoneButton
                 }
             }
-            Text(L("Daily usage uses a fixed time zone. Changing it may move usage to a different day."))
-                .font(.caption)
-                .foregroundStyle(.secondary)
-                .fixedSize(horizontal: false, vertical: true)
         }
+    }
+
+    private var footnote: some View {
+        Text(L("Daily usage uses a fixed time zone. Changing it may move usage to a different day."))
+            .font(.caption)
+            .foregroundStyle(.secondary)
+            .fixedSize(horizontal: false, vertical: true)
     }
 
     private var picker: some View {
@@ -34,7 +39,7 @@ struct SpendTimeZoneControls: View {
         }
         .labelsHidden()
         .pickerStyle(.menu)
-        .frame(width: 260)
+        .frame(maxWidth: 240)
         .help(self.selectedIdentifier)
         .accessibilityIdentifier("spend-time-zone-picker")
     }
@@ -43,6 +48,7 @@ struct SpendTimeZoneControls: View {
         Button(L("Use Mac's current time zone")) {
             self.useCurrentTimeZone()
         }
+        .controlSize(.small)
         .fixedSize()
         .help(TimeZone.current.identifier)
         .accessibilityIdentifier("spend-use-current-time-zone")

@@ -107,7 +107,7 @@ struct SpendProviderBreakdownRows: View {
             ForEach(Array(self.breakdowns.enumerated()), id: \.element.id) { index, breakdown in
                 if index > 0 {
                     Divider()
-                        .padding(.vertical, 6)
+                        .padding(.vertical, 8)
                 }
                 self.providerGroup(breakdown)
             }
@@ -116,6 +116,21 @@ struct SpendProviderBreakdownRows: View {
 
     private var breakdowns: [SpendProviderBreakdown] {
         spendDashboardProviderBreakdowns(self.group)
+    }
+
+    /// Share of the group total, by spend when priced and by tokens otherwise; hidden for a single provider.
+    private func share(of breakdown: SpendProviderBreakdown) -> Double? {
+        let breakdowns = self.breakdowns
+        guard breakdowns.count > 1 else { return nil }
+        if let cost = breakdown.totalCost {
+            let total = breakdowns.compactMap(\.totalCost).reduce(0, +)
+            return total > 0 ? min(1, max(0, cost / total)) : nil
+        }
+        if let tokens = breakdown.totalTokens {
+            let total = breakdowns.compactMap(\.totalTokens).reduce(0, +)
+            return total > 0 ? min(1, max(0, Double(tokens) / Double(total))) : nil
+        }
+        return nil
     }
 
     private func showsSubscriptionChildren(_ breakdown: SpendProviderBreakdown) -> Bool {
@@ -128,11 +143,20 @@ struct SpendProviderBreakdownRows: View {
     private func providerGroup(_ breakdown: SpendProviderBreakdown) -> some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack(spacing: 10) {
-                SpendProviderIcon(provider: breakdown.provider)
-                Text(breakdown.displayName)
-                    .font(.headline)
-                    .lineLimit(1)
-                    .help(breakdown.displayName)
+                SpendProviderIcon(provider: breakdown.provider, size: 22)
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(breakdown.displayName)
+                        .font(.headline)
+                        .lineLimit(1)
+                        .help(breakdown.displayName)
+                    if let share = self.share(of: breakdown) {
+                        ProgressView(value: share)
+                            .progressViewStyle(.linear)
+                            .controlSize(.mini)
+                            .frame(maxWidth: 220)
+                            .accessibilityHidden(true)
+                    }
+                }
                 Spacer()
                 Text(spendDashboardBreakdownMetricText(
                     cost: breakdown.totalCost,
